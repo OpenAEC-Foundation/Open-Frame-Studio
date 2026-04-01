@@ -1,0 +1,108 @@
+import { writable, derived, get } from "svelte/store";
+import { invoke } from "../lib/tauri.js";
+import { refreshProject } from "./project.js";
+import { pushSnapshot, clearHistory } from "./history.js";
+
+export const currentKozijn = writable(null);
+export const selectedCellIndex = writable(null);
+
+export const currentGeometry = writable(null);
+
+export async function createKozijn(name, mark, width, height) {
+  const k = await invoke("create_kozijn", { name, mark, width, height });
+  await refreshProject();
+  currentKozijn.set(k);
+  selectedCellIndex.set(null);
+  await refreshGeometry(k.id);
+  return k;
+}
+
+export async function createFromTemplate(template, width, height) {
+  const k = await invoke("create_kozijn_from_template", {
+    template,
+    width,
+    height,
+  });
+  await refreshProject();
+  currentKozijn.set(k);
+  selectedCellIndex.set(null);
+  await refreshGeometry(k.id);
+  return k;
+}
+
+export async function selectKozijn(id) {
+  clearHistory();
+  const k = await invoke("get_kozijn", { id });
+  currentKozijn.set(k);
+  selectedCellIndex.set(null);
+  await refreshGeometry(id);
+}
+
+export async function updateDimensions(width, height) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_kozijn_dimensions", {
+    id: k.id,
+    width,
+    height,
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
+  await refreshGeometry(updated.id);
+}
+
+export async function updateCellType(cellIndex, panelType, openingDirection) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_cell_type", {
+    id: k.id,
+    cellIndex,
+    panelType,
+    openingDirection: openingDirection || null,
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
+  await refreshGeometry(updated.id);
+}
+
+export async function addColumn(position) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("add_column", { id: k.id, position });
+  currentKozijn.set(updated);
+  await refreshProject();
+  await refreshGeometry(updated.id);
+}
+
+export async function addRow(position) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("add_row", { id: k.id, position });
+  currentKozijn.set(updated);
+  await refreshProject();
+  await refreshGeometry(updated.id);
+}
+
+export async function removeKozijn(id) {
+  await invoke("remove_kozijn", { id });
+  await refreshProject();
+  const k = get(currentKozijn);
+  if (k && k.id === id) {
+    currentKozijn.set(null);
+    currentGeometry.set(null);
+    selectedCellIndex.set(null);
+  }
+}
+
+async function refreshGeometry(id) {
+  try {
+    const geom = await invoke("get_kozijn_geometry", { id });
+    currentGeometry.set(geom);
+  } catch (e) {
+    console.error("Geometrie laden mislukt:", e);
+  }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "open-frame-studio"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ofs-core = { path = "../ofs-core" }
+tauri.workspace = true
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+anyhow.workspace = true
+tokio = { version = "1", features = ["net", "io-util", "rt", "process"] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

@@ -1,0 +1,56 @@
+{
+  "version": "2.0",
+  "description": "Open Frame Studio Profielbibliotheek - geverifieerde specificaties",
+  "categories": [
+    {
+      "id": "wood",
+      "label": "Hout",
+      "icon": "tree",
+      "files": [
+        "wood/kvt-standaard.json",
+        "wood/abc-profiel.json",
+        "wood/raamhout.json",
+        "wood/meranti.json",
+        "wood/accoya.json",
+        "wood/hebo.json",
+        "wood/goemaat.json",
+        "wood/weekamp.json",
+        "wood/webo.json",
+        "wood/raamwerk.json",
+        "wood/hardhout-fsc.json",
+        "wood/naaldhout.json"
+      ]
+    },
+    {
+      "id": "aluminum",
+      "label": "Aluminium",
+      "icon": "layers",
+      "files": [
+        "aluminum/reynaers.json",
+        "aluminum/schuco.json",
+        "aluminum/generic.json"
+      ]
+    },
+    {
+      "id": "pvc",
+      "label": "Kunststof (PVC)",
+      "icon": "box",
+      "files": [
+        "pvc/gealan.json",
+        "pvc/veka.json",
+        "pvc/kommerling.json",
+        "pvc/aluplast.json",
+        "pvc/deceuninck.json",
+        "pvc/generic.json"
+      ]
+    },
+    {
+      "id": "wood-aluminum",
+      "label": "Hout-Aluminium",
+      "icon": "combine",
+      "files": [
+        "wood-aluminum/hout-aluminium.json"
+      ]
+    }
+  ]
+}

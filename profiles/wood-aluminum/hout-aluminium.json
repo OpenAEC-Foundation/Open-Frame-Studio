@@ -1,0 +1,90 @@
+[
+  {
+    "id": "hout-alu-67x114",
+    "name": "Hout-Aluminium 67x114mm",
+    "manufacturer": "Generiek",
+    "series": "Hout-Aluminium Combi",
+    "material": "wood_aluminum",
+    "materialSubtype": "meranti_alu",
+    "width": 67,
+    "depth": 114,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "maxGlassWeight": 90,
+    "aluCapWidth": 40,
+    "aluCapDepth": 25,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 114], [0, 114]
+    ],
+    "ufValue": 1.5,
+    "applicableAs": ["frame", "sash"],
+    "finishes": ["hout gegrond + alu gepoedercoat"],
+    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+  },
+  {
+    "id": "hout-alu-67x130",
+    "name": "Hout-Aluminium 67x130mm (zwaar)",
+    "manufacturer": "Generiek",
+    "series": "Hout-Aluminium Combi",
+    "material": "wood_aluminum",
+    "materialSubtype": "meranti_alu",
+    "width": 67,
+    "depth": 130,
+    "sightline": 54,
+    "glazingRebate": 30,
+    "maxGlassWeight": 110,
+    "aluCapWidth": 40,
+    "aluCapDepth": 25,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 130], [0, 130]
+    ],
+    "ufValue": 1.4,
+    "applicableAs": ["frame", "sash"],
+    "finishes": ["hout gegrond + alu gepoedercoat"],
+    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+  },
+  {
+    "id": "hout-alu-67x150-dorpel",
+    "name": "Hout-Aluminium Dorpel 67x150mm",
+    "manufacturer": "Generiek",
+    "series": "Hout-Aluminium Combi",
+    "material": "wood_aluminum",
+    "materialSubtype": "meranti_alu",
+    "width": 67,
+    "depth": 150,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "maxGlassWeight": null,
+    "aluCapWidth": 50,
+    "aluCapDepth": 30,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 150], [0, 150]
+    ],
+    "ufValue": 1.5,
+    "applicableAs": ["sill"],
+    "finishes": ["hout gegrond + alu gepoedercoat"],
+    "colors": ["RAL9010", "RAL7016", "RAL9005"]
+  },
+  {
+    "id": "hout-alu-54x114-tussenstijl",
+    "name": "Hout-Aluminium Tussenstijl 54x114mm",
+    "manufacturer": "Generiek",
+    "series": "Hout-Aluminium Combi",
+    "material": "wood_aluminum",
+    "materialSubtype": "meranti_alu",
+    "width": 54,
+    "depth": 114,
+    "sightline": 42,
+    "glazingRebate": 24,
+    "maxGlassWeight": null,
+    "aluCapWidth": 30,
+    "aluCapDepth": 25,
+    "crossSection": [
+      [0, 0], [54, 0], [54, 114], [0, 114]
+    ],
+    "ufValue": 1.5,
+    "applicableAs": ["divider"],
+    "finishes": ["hout gegrond + alu gepoedercoat"],
+    "colors": ["RAL9010", "RAL7016"]
+  }
+]

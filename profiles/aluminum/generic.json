@@ -1,0 +1,32 @@
+[
+  {
+    "id": "alu-generic-50x70",
+    "name": "Aluminium 50x70mm",
+    "material": "aluminum",
+    "materialSubtype": null,
+    "width": 50,
+    "depth": 70,
+    "sightline": 38,
+    "glazingRebate": 28,
+    "crossSection": [
+      [0, 0], [50, 0], [50, 70], [0, 70]
+    ],
+    "ufValue": 3.5,
+    "applicableAs": ["frame", "sash", "divider"]
+  },
+  {
+    "id": "alu-generic-50x70-thermisch",
+    "name": "Aluminium 50x70mm (thermisch onderbroken)",
+    "material": "aluminum",
+    "materialSubtype": null,
+    "width": 50,
+    "depth": 70,
+    "sightline": 38,
+    "glazingRebate": 28,
+    "crossSection": [
+      [0, 0], [50, 0], [50, 70], [0, 70]
+    ],
+    "ufValue": 1.8,
+    "applicableAs": ["frame", "sash", "divider"]
+  }
+]

@@ -1,0 +1,106 @@
+/* OpenAEC Foundation Design System Tokens v0.4 */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+:root {
+  /* Colors — Primary */
+  --amber: #D97706;
+  --deep-forge: #36363E;
+  --signal-orange: #EA580C;
+  --warm-gold: #F59E0B;
+  --scaffold-gray: #A1A1AA;
+
+  /* Colors — Background */
+  --blueprint-white: #FAFAF9;
+  --concrete: #F5F5F4;
+  --night-build: #2A2A32;
+
+  /* Colors — Semantic */
+  --success: #16A34A;
+  --error: #DC2626;
+  --warning: #F59E0B;
+  --info: #2563EB;
+
+  /* Typography */
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", monospace;
+
+  /* Spacing (4px base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Borders */
+  --border-default: 1px solid #E7E5E4;
+  --border-hover: 1px solid #D6D3D1;
+  --border-featured: 2px solid var(--amber);
+
+  /* Gradient */
+  --gradient-accent: linear-gradient(90deg, #D97706 0%, #F59E0B 40%, #EA580C 100%);
+
+  /* Theme — Light (default) */
+  --bg-app: var(--blueprint-white);
+  --bg-surface: #FFFFFF;
+  --bg-surface-alt: var(--concrete);
+  --bg-ribbon: var(--deep-forge);
+  --bg-titlebar: var(--night-build);
+  --bg-statusbar: var(--deep-forge);
+
+  --text-primary: var(--deep-forge);
+  --text-secondary: #57534E;
+  --text-muted: var(--scaffold-gray);
+  --text-on-dark: var(--blueprint-white);
+  --text-accent: var(--amber);
+
+  --editor-bg: #FFFFFF;
+  --editor-grid: #F0EFED;
+  --editor-frame: var(--deep-forge);
+  --editor-glass: #DBEAFE;
+  --editor-glass-stroke: #93C5FD;
+  --editor-panel: #E7E5E4;
+  --editor-door: #FED7AA;
+  --editor-selected: var(--amber);
+  --editor-dimension: var(--scaffold-gray);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-app: var(--night-build);
+  --bg-surface: var(--deep-forge);
+  --bg-surface-alt: #2E2E36;
+  --bg-ribbon: #1E1E24;
+  --bg-titlebar: #16161A;
+  --bg-statusbar: #1E1E24;
+
+  --text-primary: var(--blueprint-white);
+  --text-secondary: #D6D3D1;
+  --text-muted: #78716C;
+  --text-on-dark: var(--blueprint-white);
+
+  --editor-bg: #1E1E24;
+  --editor-grid: #2A2A32;
+  --editor-frame: #D6D3D1;
+  --editor-glass: #1E3A5F;
+  --editor-glass-stroke: #3B82F6;
+  --editor-panel: #44403C;
+  --editor-door: #7C2D12;
+  --editor-selected: var(--warm-gold);
+  --editor-dimension: #78716C;
+}

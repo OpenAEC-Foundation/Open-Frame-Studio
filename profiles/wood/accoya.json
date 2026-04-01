@@ -1,0 +1,32 @@
+[
+  {
+    "id": "wood-accoya-67x114",
+    "name": "Accoya 67x114mm",
+    "material": "wood",
+    "materialSubtype": "accoya",
+    "width": 67,
+    "depth": 114,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 114], [0, 114]
+    ],
+    "ufValue": 1.5,
+    "applicableAs": ["frame", "sash", "divider"]
+  },
+  {
+    "id": "wood-accoya-67x150",
+    "name": "Accoya 67x150mm (dorpel)",
+    "material": "wood",
+    "materialSubtype": "accoya",
+    "width": 67,
+    "depth": 150,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 150], [0, 150]
+    ],
+    "ufValue": 1.5,
+    "applicableAs": ["sill"]
+  }
+]

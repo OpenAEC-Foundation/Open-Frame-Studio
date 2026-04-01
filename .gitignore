@@ -1,0 +1,50 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+!src-tauri/Cargo.lock
+
+# Node / Vite
+ui/node_modules/
+ui/dist/
+ui/.vite/
+ui/.svelte-kit/
+
+# Python
+python/__pycache__/
+python/*.pyc
+python/.venv/
+python/venv/
+python/*.egg-info/
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+src-tauri/WixTools/
+src-tauri/icons/icon.ico.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Build artifacts
+*.exe
+*.msi
+*.dmg
+*.AppImage
+*.deb
+*.snap

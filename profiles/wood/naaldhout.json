@@ -1,0 +1,62 @@
+[
+  {
+    "id": "naaldhout-67x114",
+    "name": "Naaldhout (vuren/grenen) 67x114mm",
+    "manufacturer": "Generiek",
+    "series": "Naaldhout Standaard",
+    "material": "wood",
+    "materialSubtype": "naaldhout",
+    "width": 67,
+    "depth": 114,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "maxGlassWeight": 70,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 114], [0, 114]
+    ],
+    "ufValue": 2.0,
+    "applicableAs": ["frame", "sash", "divider"],
+    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
+    "colors": ["RAL9010", "RAL9001", "RAL9016"]
+  },
+  {
+    "id": "naaldhout-67x150-dorpel",
+    "name": "Naaldhout Dorpel 67x150mm",
+    "manufacturer": "Generiek",
+    "series": "Naaldhout Standaard",
+    "material": "wood",
+    "materialSubtype": "naaldhout",
+    "width": 67,
+    "depth": 150,
+    "sightline": 54,
+    "glazingRebate": 24,
+    "maxGlassWeight": null,
+    "crossSection": [
+      [0, 0], [67, 0], [67, 150], [0, 150]
+    ],
+    "ufValue": 2.0,
+    "applicableAs": ["sill"],
+    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
+    "colors": ["RAL9010", "RAL9001"]
+  },
+  {
+    "id": "naaldhout-54x114-tussenstijl",
+    "name": "Naaldhout Tussenstijl 54x114mm",
+    "manufacturer": "Generiek",
+    "series": "Naaldhout Standaard",
+    "material": "wood",
+    "materialSubtype": "naaldhout",
+    "width": 54,
+    "depth": 114,
+    "sightline": 42,
+    "glazingRebate": 24,
+    "maxGlassWeight": null,
+    "crossSection": [
+      [0, 0], [54, 0], [54, 114], [0, 114]
+    ],
+    "ufValue": 2.0,
+    "applicableAs": ["divider"],
+    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
+    "colors": ["RAL9010", "RAL9001"]
+  }
+]

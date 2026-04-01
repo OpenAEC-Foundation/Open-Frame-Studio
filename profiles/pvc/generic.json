@@ -1,0 +1,32 @@
+[
+  {
+    "id": "pvc-generic-70x80",
+    "name": "Kunststof 70x80mm (3-kamer)",
+    "material": "pvc",
+    "materialSubtype": null,
+    "width": 70,
+    "depth": 80,
+    "sightline": 55,
+    "glazingRebate": 24,
+    "crossSection": [
+      [0, 0], [70, 0], [70, 80], [0, 80]
+    ],
+    "ufValue": 1.3,
+    "applicableAs": ["frame", "sash", "divider"]
+  },
+  {
+    "id": "pvc-generic-76x90",
+    "name": "Kunststof 76x90mm (5-kamer)",
+    "material": "pvc",
+    "materialSubtype": null,
+    "width": 76,
+    "depth": 90,
+    "sightline": 58,
+    "glazingRebate": 28,
+    "crossSection": [
+      [0, 0], [76, 0], [76, 90], [0, 90]
+    ],
+    "ufValue": 1.1,
+    "applicableAs": ["frame", "sash", "divider"]
+  }
+]

@@ -1,0 +1,53 @@
+use crate::state::AppState;
+use tauri::State;
+
+#[tauri::command]
+pub async fn export_ifc(
+    state: State<'_, AppState>,
+    id: String,
+    output_path: String,
+) -> Result<String, String> {
+    // Extract data from mutex before any await points
+    let kozijn_json = {
+        let project = state.project.lock().map_err(|e| e.to_string())?;
+        let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+        let kozijn = project
+            .kozijnen
+            .iter()
+            .find(|k| k.id == id)
+            .ok_or("Kozijn niet gevonden")?;
+        serde_json::to_string(kozijn).map_err(|e| e.to_string())?
+    }; // MutexGuard dropped here
+
+    // Find the Python sidecar script
+    let python_dir = std::env::current_exe()
+        .map_err(|e| e.to_string())?
+        .parent()
+        .ok_or("Cannot find exe directory")?
+        .join("../python");
+
+    // Fall back to development path
+    let python_dir = if python_dir.exists() {
+        python_dir
+    } else {
+        std::path::PathBuf::from("python")
+    };
+
+    let output = tokio::process::Command::new("python")
+        .arg(python_dir.join("main.py"))
+        .arg("generate-ifc")
+        .arg("--output")
+        .arg(&output_path)
+        .arg("--kozijn-json")
+        .arg(&kozijn_json)
+        .output()
+        .await
+        .map_err(|e| format!("Python sidecar fout: {}", e))?;
+
+    if output.status.success() {
+        Ok(output_path)
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("IFC export mislukt: {}", stderr))
+    }
+}
