@@ -160,7 +160,7 @@ jobs:
           signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           cache-dependencies: false
-          files-folder: ${{ github.workspace }}/src-tauri/target/release/bundle/nsis
+          files-folder: ${{ github.workspace }}/target/release/bundle/nsis
           files-folder-filter: exe
           files-folder-depth: 1
           file-digest: SHA256
@@ -178,7 +178,7 @@ jobs:
           signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           cache-dependencies: false
-          files-folder: ${{ github.workspace }}/src-tauri/target/release
+          files-folder: ${{ github.workspace }}/target/release
           files-folder-filter: exe
           files-folder-depth: 1
           file-digest: SHA256
@@ -192,7 +192,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $VERSION = "${{ needs.create-release.outputs.version }}"
-          $NSIS_DIR = "src-tauri/target/release/bundle/nsis"
+          $NSIS_DIR = "target/release/bundle/nsis"
           $EXE = Get-ChildItem "$NSIS_DIR/*-setup.exe" | Select-Object -First 1
           $NEW_NAME = $EXE.Name -replace '_x64-setup\.exe$', '_x64_user-setup.exe'
           $NEW_PATH = Join-Path $EXE.DirectoryName $NEW_NAME
