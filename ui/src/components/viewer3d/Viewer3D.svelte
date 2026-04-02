@@ -241,14 +241,14 @@
     const dividerMat = frameMat.clone();
 
     // Helper: create a box mesh from a 2D rect, extruded into Z
-    function makeBox(rect, depth, material) {
+    function makeBox(rect, depth, material, zOffset = 0) {
       const geo = new THREE.BoxGeometry(rect.width, rect.height, depth);
       const mesh = new THREE.Mesh(geo, material);
       // Position: rect x,y are top-left in 2D, convert to center for Three.js
       mesh.position.set(
         rect.x + rect.width / 2,
         -(rect.y + rect.height / 2), // flip Y (2D y-down to 3D y-up)
-        0
+        zOffset
       );
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -263,28 +263,35 @@
     }
 
     // Cell panels (glass, door, panel)
+    // Glass sits in the sponning (rebate), offset toward the outside
+    const GLASS_CLEARANCE = 4; // mm clearance per side
+    const glassThickness = kozijn.cells?.[0]?.glazing?.thicknessMm || 24;
+    // Sponning position: glass sits ~30% from the outside face
+    const glassZOffset = frameDepth * 0.3 - frameDepth / 2;
+
     if (geometry.cellRects) {
       for (const cellRect of geometry.cellRects) {
         const cell = kozijn.cells?.[cellRect.cellIndex];
         const panelType = cell?.panelType || "fixed_glass";
         const rect = cellRect.rect;
 
-        let mat;
-        let depth;
+        // Apply glass clearance — glass/panel is smaller than the cell opening
+        const insetRect = {
+          x: rect.x + GLASS_CLEARANCE,
+          y: rect.y + GLASS_CLEARANCE,
+          width: Math.max(1, rect.width - 2 * GLASS_CLEARANCE),
+          height: Math.max(1, rect.height - 2 * GLASS_CLEARANCE),
+        };
 
         if (panelType === "panel") {
-          mat = panelMat;
-          depth = frameDepth * 0.6;
+          kozijnGroup.add(makeBox(insetRect, frameDepth * 0.6, panelMat, 0));
         } else if (panelType === "door") {
-          mat = doorMat;
-          depth = frameDepth * 0.7;
+          kozijnGroup.add(makeBox(insetRect, frameDepth * 0.7, doorMat, 0));
         } else {
           // Glass types: fixed_glass, turn_tilt, turn, tilt, sliding
-          mat = glassMat;
-          depth = 4; // 4mm glass thickness
+          const thisGlassThickness = cell?.glazing?.thicknessMm || glassThickness;
+          kozijnGroup.add(makeBox(insetRect, thisGlassThickness, glassMat, glassZOffset));
         }
-
-        kozijnGroup.add(makeBox(rect, depth, mat));
       }
     }
 

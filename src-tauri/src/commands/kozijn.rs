@@ -1,8 +1,10 @@
 use crate::state::AppState;
 use ofs_core::geometry::{compute_2d_geometry, KozijnGeometry2D};
 use ofs_core::hardware::{self, HardwareSet, SecurityClass};
-use ofs_core::kozijn::{FrameShape, Kozijn, PanelType, OpeningDirection, ShapeType};
+use ofs_core::kozijn::{FrameShape, Glazing, Kozijn, PanelType, OpeningDirection, ShapeType};
 use ofs_core::profile::ProfileRef;
+use ofs_core::thermal;
+use ofs_core::template::{self, KozijnSjabloon};
 use ofs_core::grid;
 use tauri::State;
 
@@ -26,17 +28,27 @@ pub fn create_kozijn_from_template(
     template: String,
     width: f64,
     height: f64,
+    sjabloon_id: Option<String>,
 ) -> Result<Kozijn, String> {
+    let sj = sjabloon_id
+        .map(|id| template::get_sjabloon(&id))
+        .unwrap_or_else(template::default_sjabloon);
+
     let kozijn = match template.as_str() {
-        "single_turn_tilt" => grid::template_single_turn_tilt(width, height),
-        "double_turn_tilt" => grid::template_double_turn_tilt(width, height),
-        "sliding_door" => grid::template_sliding_door(width, height),
-        "front_door" => grid::template_front_door(width, height),
-        _ => Kozijn::new("Kozijn", "K01", width, height),
+        "single_turn_tilt" => grid::template_single_turn_tilt_sj(width, height, &sj),
+        "double_turn_tilt" => grid::template_double_turn_tilt_sj(width, height, &sj),
+        "sliding_door" => grid::template_sliding_door_sj(width, height, &sj),
+        "front_door" => grid::template_front_door_sj(width, height, &sj),
+        _ => Kozijn::new_with_sjabloon("Kozijn", "K01", width, height, &sj),
     };
     let mut project = state.project.lock().map_err(|e| e.to_string())?;
     project.kozijnen.push(kozijn.clone());
     Ok(kozijn)
+}
+
+#[tauri::command]
+pub fn get_sjablonen() -> Vec<KozijnSjabloon> {
+    template::builtin_sjablonen()
 }
 
 #[tauri::command]
@@ -296,6 +308,35 @@ pub fn update_cell_type(
         SecurityClass::None,
     );
 
+    // Auto-assign sash profile based on panel type (professional workflow)
+    match panel_type {
+        PanelType::TurnTilt | PanelType::Turn | PanelType::Tilt | PanelType::Sliding => {
+            if cell.sash_profile.is_none() {
+                cell.sash_profile = Some(ProfileRef {
+                    id: "raam-meranti-54x67".into(),
+                    name: "Raamhout 54x67mm".into(),
+                });
+                cell.sash_width = Some(54.0);
+                cell.sash_depth = Some(67.0);
+            }
+        }
+        PanelType::Door => {
+            if cell.sash_profile.is_none() {
+                cell.sash_profile = Some(ProfileRef {
+                    id: "deur-meranti-67x114".into(),
+                    name: "Deurhout 67x114mm".into(),
+                });
+                cell.sash_width = Some(67.0);
+                cell.sash_depth = Some(114.0);
+            }
+        }
+        _ => {
+            cell.sash_profile = None;
+            cell.sash_width = None;
+            cell.sash_depth = None;
+        }
+    }
+
     Ok(kozijn.clone())
 }
 
@@ -372,6 +413,9 @@ pub fn update_frame_shape(
         shape_type,
         arch_radius: None, // computed from arch_height in geometry
         arch_height,
+        top_width: None,
+        left_angle: None,
+        right_angle: None,
     };
 
     Ok(kozijn.clone())
@@ -489,4 +533,74 @@ pub fn update_security_class(
     );
 
     Ok(kozijn.clone())
+}
+
+#[tauri::command]
+pub fn update_cell_glazing(
+    state: State<'_, AppState>,
+    id: String,
+    cell_index: usize,
+    glazing_json: String,
+) -> Result<Kozijn, String> {
+    let mut project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let kozijn = project.kozijnen.iter_mut().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+    let cell = kozijn.cells.get_mut(cell_index)
+        .ok_or("Cel niet gevonden")?;
+
+    let glazing: Glazing = serde_json::from_str(&glazing_json)
+        .map_err(|e| format!("Ongeldig glazing JSON: {}", e))?;
+    cell.glazing = glazing;
+
+    Ok(kozijn.clone())
+}
+
+#[tauri::command]
+pub fn update_frame_colors(
+    state: State<'_, AppState>,
+    id: String,
+    color_inside: String,
+    color_outside: String,
+) -> Result<Kozijn, String> {
+    let mut project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let kozijn = project.kozijnen.iter_mut().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+
+    kozijn.frame.color_inside = color_inside;
+    kozijn.frame.color_outside = color_outside;
+
+    Ok(kozijn.clone())
+}
+
+#[tauri::command]
+pub fn duplicate_kozijn(
+    state: State<'_, AppState>,
+    id: String,
+    new_mark: String,
+) -> Result<Kozijn, String> {
+    let mut project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let original = project.kozijnen.iter().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+
+    let duplicate = original.duplicate(&new_mark);
+    project.kozijnen.push(duplicate.clone());
+
+    Ok(duplicate)
+}
+
+#[tauri::command]
+pub fn calculate_thermal(
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<thermal::ThermalResult, String> {
+    let project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let kozijn = project.kozijnen.iter().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+
+    let profiles = &project.custom_profiles;
+    Ok(thermal::calculate_uw(kozijn, profiles))
 }

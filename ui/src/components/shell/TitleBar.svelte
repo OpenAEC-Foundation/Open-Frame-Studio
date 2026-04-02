@@ -22,13 +22,18 @@
     if (isTauri) {
       try {
         const { exit } = await import("@tauri-apps/plugin-process");
-        await exit(0);
-      } catch {
-        // Fallback: try window close, then force via API
+        exit(0);
+      } catch (e1) {
+        console.warn("exit() failed:", e1);
         try {
-          await appWindow?.close();
-        } catch {
-          window.close();
+          await appWindow?.destroy();
+        } catch (e2) {
+          console.warn("destroy() failed:", e2);
+          try {
+            await appWindow?.close();
+          } catch {
+            window.close();
+          }
         }
       }
     }

@@ -15,6 +15,15 @@ pub struct Sill {
     pub neut: NeutConfig,
     pub drainage: bool,
     pub slope_degrees: f64,
+    /// Laagrelief dorpel (low-relief sill with separate strip)
+    #[serde(default)]
+    pub is_laagrelief: bool,
+    /// Height of the laagrelief strip in mm (the non-wood portion)
+    #[serde(default)]
+    pub laagrelief_height: Option<f64>,
+    /// Material of the laagrelief strip
+    #[serde(default)]
+    pub laagrelief_material: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -71,6 +80,9 @@ impl Default for Sill {
             neut: NeutConfig::default(),
             drainage: true,
             slope_degrees: 3.0,
+            is_laagrelief: false,
+            laagrelief_height: None,
+            laagrelief_material: None,
         }
     }
 }

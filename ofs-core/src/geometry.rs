@@ -193,7 +193,7 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     }
 
     // Dimension lines
-    let dim_offset = 15.0;
+    let dim_offset = 25.0;
     let mut dimensions = Vec::new();
 
     // Overall width (bottom)
@@ -216,26 +216,69 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         side: DimensionSide::Right,
     });
 
-    // Column widths
+    // Dagmaat width (inner opening, below buitenmaat)
+    let inner_w = ow - 2.0 * fw;
+    let inner_h = oh - 2.0 * fw;
+    dimensions.push(DimensionLine {
+        x1: fw,
+        y1: oh + dim_offset * 2.0,
+        x2: fw + inner_w,
+        y2: oh + dim_offset * 2.0,
+        label: format!("{:.0}", inner_w),
+        side: DimensionSide::Bottom,
+    });
+
+    // Dagmaat height (inner opening, right of buitenmaat)
+    dimensions.push(DimensionLine {
+        x1: ow + dim_offset * 2.0,
+        y1: fw,
+        x2: ow + dim_offset * 2.0,
+        y2: fw + inner_h,
+        label: format!("{:.0}", inner_h),
+        side: DimensionSide::Right,
+    });
+
+    // Profielmaat left stijl (width of frame member)
+    dimensions.push(DimensionLine {
+        x1: 0.0,
+        y1: oh + dim_offset * 3.0,
+        x2: fw,
+        y2: oh + dim_offset * 3.0,
+        label: format!("{:.0}", fw),
+        side: DimensionSide::Bottom,
+    });
+
+    // Column widths (vakmaten, on 4th offset level)
     for (i, col) in kozijn.grid.columns.iter().enumerate() {
         let cx = col_positions[i];
         dimensions.push(DimensionLine {
             x1: cx,
-            y1: oh + dim_offset * 2.0,
+            y1: oh + dim_offset * 3.0,
             x2: cx + col.size,
-            y2: oh + dim_offset * 2.0,
+            y2: oh + dim_offset * 3.0,
             label: format!("{:.0}", col.size),
             side: DimensionSide::Bottom,
         });
     }
 
-    // Row heights
+    // Profielmaat right stijl
+    let last_col_end = col_positions.last().map(|p| *p + kozijn.grid.columns.last().map(|c| c.size).unwrap_or(0.0)).unwrap_or(fw + inner_w);
+    dimensions.push(DimensionLine {
+        x1: last_col_end,
+        y1: oh + dim_offset * 3.0,
+        x2: ow,
+        y2: oh + dim_offset * 3.0,
+        label: format!("{:.0}", fw),
+        side: DimensionSide::Bottom,
+    });
+
+    // Row heights (vakmaten, on 3rd offset level right)
     for (i, row) in kozijn.grid.rows.iter().enumerate() {
         let cy = row_positions[i];
         dimensions.push(DimensionLine {
-            x1: ow + dim_offset * 2.0,
+            x1: ow + dim_offset * 3.0,
             y1: cy,
-            x2: ow + dim_offset * 2.0,
+            x2: ow + dim_offset * 3.0,
             y2: cy + row.size,
             label: format!("{:.0}", row.size),
             side: DimensionSide::Right,

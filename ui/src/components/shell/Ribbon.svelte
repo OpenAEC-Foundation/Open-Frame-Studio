@@ -9,9 +9,25 @@
     addColumn,
     addRow,
     updateCellType,
+    duplicateKozijn,
+    removeKozijn,
   } from "../../stores/kozijn.js";
   import { createVgFromTemplate } from "../../stores/vliesgevel.js";
   import { invoke, isTauri } from "../../lib/tauri.js";
+  import { onMount } from "svelte";
+  import { registerShortcuts } from "../../lib/shortcuts.js";
+  import ShapeManager from "../panels/ShapeManager.svelte";
+
+  let showShapeManager = false;
+
+  // Sjabloon (template) system
+  const SJABLONEN = [
+    { id: "standaard-67-meranti", name: "Standaard 67mm Meranti", series: "67" },
+    { id: "standaard-67-accoya", name: "Standaard 67mm Accoya", series: "67" },
+    { id: "zwaar-78-meranti", name: "Zwaar 78mm Meranti", series: "78" },
+    { id: "passief-90-meranti", name: "Passief 90mm Meranti", series: "90" },
+  ];
+  let activeSjabloonId = "standaard-67-meranti";
 
   const tabs = [
     { id: "home", label: "Home" },
@@ -35,7 +51,7 @@
 
   async function handleTemplate(template) {
     const [w, h] = templateSizes[template] || [1200, 1500];
-    await createFromTemplate(template, w, h);
+    await createFromTemplate(template, w, h, activeSjabloonId);
   }
 
   async function handleExportIfc() {
@@ -181,6 +197,80 @@
     const innerH = $currentKozijn.frame.outerHeight - 2 * $currentKozijn.frame.frameWidth;
     addRow(innerH / 2);
   }
+
+  async function handleDuplicate() {
+    if (!$currentKozijn) return;
+    const mark = "K" + String(Date.now()).slice(-3);
+    await duplicateKozijn(mark);
+  }
+
+  async function handleRemove() {
+    if (!$currentKozijn) return;
+    if (confirm(`Kozijn "${$currentKozijn.mark}" verwijderen?`)) {
+      await removeKozijn($currentKozijn.id);
+    }
+  }
+
+  onMount(() => {
+    registerShortcuts({ onDuplicate: handleDuplicate });
+  });
+
+  let showImportDialog = false;
+  let importMode = "dxf"; // "dxf" | "catalog"
+
+  function openImportDxf() {
+    importMode = "dxf";
+    showImportDialog = true;
+  }
+
+  function openImportCatalog() {
+    importMode = "catalog";
+    showImportDialog = true;
+  }
+
+  async function handleImportDxf() {
+    const { open } = isTauri
+      ? await import("@tauri-apps/plugin-dialog")
+      : { open: async () => prompt("DXF bestandspad:") };
+    const path = await open({
+      filters: [{ name: "DXF", extensions: ["dxf"] }],
+      multiple: false,
+    });
+    if (path) {
+      try {
+        const result = await invoke("import_dxf_profile", { filePath: path });
+        const profile = JSON.parse(result);
+        await invoke("add_custom_profile", { profileJson: JSON.stringify(profile) });
+        alert(`Profiel "${profile.name}" (${profile.width}x${profile.depth}mm) geïmporteerd!`);
+      } catch (e) {
+        alert("DXF import fout: " + e);
+      }
+    }
+  }
+
+  async function handleImportCatalog() {
+    const { open } = isTauri
+      ? await import("@tauri-apps/plugin-dialog")
+      : { open: async () => prompt("Catalogus bestandspad:") };
+    const path = await open({
+      filters: [
+        { name: "Catalogus bestanden", extensions: ["json", "xlsx", "xls", "csv"] },
+      ],
+      multiple: false,
+    });
+    if (path) {
+      try {
+        const result = await invoke("import_catalog", { filePath: path, supplier: null });
+        const profiles = JSON.parse(result);
+        for (const profile of profiles) {
+          await invoke("add_custom_profile", { profileJson: JSON.stringify(profile) });
+        }
+        alert(`${profiles.length} profiel(en) geïmporteerd uit catalogus!`);
+      } catch (e) {
+        alert("Catalogus import fout: " + e);
+      }
+    }
+  }
 </script>
 
 <div class="ribbon">
@@ -198,6 +288,17 @@
 
   <div class="ribbon-content">
     {#if $activeRibbonTab === "home"}
+      <div class="ribbon-group">
+        <span class="group-label">Sjabloon</span>
+        <select class="sjabloon-select" bind:value={activeSjabloonId}>
+          {#each SJABLONEN as sj}
+            <option value={sj.id}>{sj.name}</option>
+          {/each}
+        </select>
+      </div>
+
+      <div class="ribbon-divider"></div>
+
       <div class="ribbon-group">
         <span class="group-label">Nieuw kozijn</span>
         <div class="group-buttons">
@@ -260,6 +361,55 @@
               <line x1="3" y1="12" x2="21" y2="12" stroke-dasharray="3 2"/>
             </svg>
             <span>+ Rij</span>
+          </button>
+          <button class="ribbon-btn" on:click={handleDuplicate} disabled={!$currentKozijn}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="6" width="14" height="14" rx="1"/>
+              <rect x="4" y="4" width="14" height="14" rx="1"/>
+            </svg>
+            <span>Dupliceer</span>
+          </button>
+          <button class="ribbon-btn" on:click={handleRemove} disabled={!$currentKozijn}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+            <span>Verwijder</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ribbon-divider"></div>
+
+      <div class="ribbon-group">
+        <span class="group-label">Importeren</span>
+        <div class="group-buttons">
+          <button class="ribbon-btn primary" on:click={() => showShapeManager = true}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="2" width="10" height="16" rx="1"/>
+              <path d="M7 6h4m-4 3h4m-4 3h2"/>
+              <circle cx="17" cy="17" r="5"/>
+              <path d="M17 14v6m-3-3h6"/>
+            </svg>
+            <span>Nieuw profiel</span>
+          </button>
+          <button class="ribbon-btn" on:click={handleImportDxf}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3v12m0 0l4-4m-4 4l-4-4"/>
+              <rect x="4" y="18" width="16" height="3" rx="1"/>
+            </svg>
+            <span>Profiel DXF</span>
+          </button>
+          <button class="ribbon-btn" on:click={handleImportCatalog}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/>
+              <line x1="4" y1="9" x2="20" y2="9"/>
+              <line x1="4" y1="14" x2="20" y2="14"/>
+              <line x1="10" y1="4" x2="10" y2="20"/>
+            </svg>
+            <span>Catalogus</span>
           </button>
         </div>
       </div>
@@ -337,15 +487,7 @@
             </svg>
             <span>Element</span>
           </button>
-          <button class="ribbon-btn" on:click={() => createVgFromTemplate("shopfront", 6000, 3000)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="20" rx="0"/>
-              <line x1="8" y1="2" x2="8" y2="22"/>
-              <line x1="2" y1="14" x2="22" y2="14"/>
-              <circle cx="6" cy="18" r="1"/>
-            </svg>
-            <span>Winkelpui</span>
-          </button>
+          <!-- Winkelpui verwijderd — niet relevant voor kozijnsoftware -->
         </div>
       </div>
 
@@ -542,6 +684,8 @@
   </div>
 </div>
 
+<ShapeManager bind:visible={showShapeManager} on:saved={() => { showShapeManager = false; }} />
+
 <style>
   .ribbon {
     background: var(--bg-ribbon);
@@ -638,5 +782,25 @@
     height: 56px;
     background: rgba(255, 255, 255, 0.1);
     align-self: center;
+  }
+
+  .sjabloon-select {
+    padding: var(--sp-2) var(--sp-3);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
+    color: var(--text-on-dark);
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 180px;
+    cursor: pointer;
+  }
+  .sjabloon-select:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+  .sjabloon-select option {
+    background: var(--bg-ribbon);
+    color: var(--text-on-dark);
   }
 </style>

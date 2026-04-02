@@ -20,9 +20,9 @@
     if (rect.width === 0 || rect.height === 0) return;
 
     const outer = $currentGeometry.outerRect;
-    // Add padding for dimension lines
-    const contentW = outer.width + 120;
-    const contentH = outer.height + 120;
+    // Add padding for dimension lines (3 levels of offset + labels)
+    const contentW = outer.width + 160;
+    const contentH = outer.height + 160;
 
     const scaleX = (rect.width - 60) / contentW;
     const scaleY = (rect.height - 60) / contentH;
@@ -90,7 +90,7 @@
   {#if $currentKozijn && $currentGeometry}
     <svg class="canvas" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate({$editorPan.x}, {$editorPan.y}) scale({$zoom})">
-        <KozijnCanvas geometry={$currentGeometry} kozijn={$currentKozijn} />
+        <KozijnCanvas geometry={$currentGeometry} kozijn={$currentKozijn} zoom={$zoom} />
         <GridHandles geometry={$currentGeometry} kozijn={$currentKozijn} on:resize={handleGridResize} />
       </g>
     </svg>

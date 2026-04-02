@@ -40,6 +40,11 @@ fn main() {
             commands::kozijn::update_cell_hardware,
             commands::kozijn::auto_select_hardware,
             commands::kozijn::update_security_class,
+            commands::kozijn::update_cell_glazing,
+            commands::kozijn::update_frame_colors,
+            commands::kozijn::duplicate_kozijn,
+            commands::kozijn::calculate_thermal,
+            commands::kozijn::get_sjablonen,
             // Export commands
             commands::export_ifc::export_ifc,
             commands::export_dxf::export_dxf,
@@ -67,6 +72,9 @@ fn main() {
             commands::vliesgevel::get_vliesgevel_geometry,
             commands::vliesgevel::get_vliesgevel_production,
             commands::vliesgevel::remove_vliesgevel,
+            // Import commands
+            commands::import_profile::import_dxf_profile,
+            commands::import_profile::import_catalog,
             // Blender commands
             commands::blender::send_to_blender,
             commands::blender::check_blender_connection,

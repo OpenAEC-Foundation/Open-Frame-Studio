@@ -43,6 +43,15 @@ def main():
     prod_parser.add_argument("--format", choices=["pdf", "xlsx", "csv"], default="pdf")
     prod_parser.add_argument("--production-json", required=True)
 
+    # import-dxf-profile
+    dxf_import_parser = subparsers.add_parser("import-dxf-profile")
+    dxf_import_parser.add_argument("--file", required=True)
+
+    # import-catalog
+    catalog_parser = subparsers.add_parser("import-catalog")
+    catalog_parser.add_argument("--file", required=True)
+    catalog_parser.add_argument("--supplier", default=None)
+
     args = parser.parse_args()
 
     if args.command == "generate-ifc":
@@ -92,6 +101,16 @@ def main():
             from ofs_production.csv_generator import generate_production_csv
             generate_production_csv(prod_data, args.output)
         print(json.dumps({"status": "ok", "path": args.output}))
+
+    elif args.command == "import-dxf-profile":
+        from ofs_import.dxf_profile_parser import parse_dxf_profile
+        profile = parse_dxf_profile(args.file)
+        print(json.dumps({"status": "ok", "profile": profile}))
+
+    elif args.command == "import-catalog":
+        from ofs_import.catalog_parser import parse_catalog
+        profiles = parse_catalog(args.file, args.supplier)
+        print(json.dumps({"status": "ok", "profiles": profiles}))
 
     else:
         parser.print_help()

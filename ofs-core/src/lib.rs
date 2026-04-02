@@ -12,3 +12,5 @@ pub mod vliesgevel_grid;
 pub mod vliesgevel_geometry;
 pub mod vliesgevel_validation;
 pub mod vliesgevel_production;
+pub mod thermal;
+pub mod template;

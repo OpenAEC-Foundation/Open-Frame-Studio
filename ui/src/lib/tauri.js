@@ -90,7 +90,8 @@ function mockCommand(cmd, args) {
           { ...defaultCell(), panelType: "door", openingDirection: "inward" },
         ];
       } else if (args.template === "single_turn_tilt") {
-        k.cells = [{ ...defaultCell(), panelType: "turn_tilt", openingDirection: "left" }];
+        k.cells = [{ ...defaultCell(), panelType: "turn_tilt", openingDirection: "left",
+          sashProfile: { id: "raam-meranti-54x67", name: "Raamhout 54x67mm" }, sashWidth: 54, sashDepth: 67 }];
       } else if (args.template === "melkmeisje") {
         const fw = 67;
         const innerW = args.width - 2 * fw;
@@ -174,10 +175,33 @@ function mockCommand(cmd, args) {
     case "update_cell_type": {
       const k = mockState.project.kozijnen.find((k) => k.id === args.id);
       if (!k) return Promise.reject("Kozijn niet gevonden");
-      k.cells[args.cellIndex].panelType = args.panelType;
-      k.cells[args.cellIndex].openingDirection = args.openingDirection;
+      const cell = k.cells[args.cellIndex];
+      cell.panelType = args.panelType;
+      cell.openingDirection = args.openingDirection;
+      // Auto-assign sash profile (professional workflow)
+      if (["turn_tilt", "turn", "tilt", "sliding"].includes(args.panelType)) {
+        cell.sashProfile = cell.sashProfile || { id: "raam-meranti-54x67", name: "Raamhout 54x67mm" };
+        cell.sashWidth = cell.sashWidth || 54;
+        cell.sashDepth = cell.sashDepth || 67;
+      } else if (args.panelType === "door") {
+        cell.sashProfile = cell.sashProfile || { id: "deur-meranti-67x114", name: "Deurhout 67x114mm" };
+        cell.sashWidth = cell.sashWidth || 67;
+        cell.sashDepth = cell.sashDepth || 114;
+      } else {
+        cell.sashProfile = null;
+        cell.sashWidth = null;
+        cell.sashDepth = null;
+      }
       return structuredClone(k);
     }
+
+    case "get_sjablonen":
+      return [
+        { id: "standaard-67-meranti", name: "Standaard 67mm Meranti", profileSeries: "67", frameWidth: 67, frameDepth: 114, sashWidth: 54, sashDepth: 67 },
+        { id: "standaard-67-accoya", name: "Standaard 67mm Accoya", profileSeries: "67", frameWidth: 67, frameDepth: 114, sashWidth: 54, sashDepth: 67 },
+        { id: "zwaar-78-meranti", name: "Zwaar 78mm Meranti", profileSeries: "78", frameWidth: 78, frameDepth: 114, sashWidth: 54, sashDepth: 78 },
+        { id: "passief-90-meranti", name: "Passief 90mm Meranti", profileSeries: "90", frameWidth: 90, frameDepth: 114, sashWidth: 54, sashDepth: 90 },
+      ];
 
     case "add_column": {
       const k = mockState.project.kozijnen.find((k) => k.id === args.id);
@@ -252,6 +276,60 @@ function mockCommand(cmd, args) {
 
     case "check_blender_connection":
       return false;
+
+    case "update_cell_glazing": {
+      const k = mockState.project.kozijnen.find((k) => k.id === args.id);
+      if (!k) return Promise.reject("Kozijn niet gevonden");
+      const glazing = JSON.parse(args.glazingJson);
+      k.cells[args.cellIndex].glazing = glazing;
+      return structuredClone(k);
+    }
+
+    case "update_frame_colors": {
+      const k = mockState.project.kozijnen.find((k) => k.id === args.id);
+      if (!k) return Promise.reject("Kozijn niet gevonden");
+      k.frame.colorInside = args.colorInside;
+      k.frame.colorOutside = args.colorOutside;
+      return structuredClone(k);
+    }
+
+    case "duplicate_kozijn": {
+      const k = mockState.project.kozijnen.find((k) => k.id === args.id);
+      if (!k) return Promise.reject("Kozijn niet gevonden");
+      const dup = structuredClone(k);
+      dup.id = crypto.randomUUID();
+      dup.mark = args.newMark;
+      dup.name = k.name + " (kopie)";
+      mockState.project.kozijnen.push(dup);
+      return structuredClone(dup);
+    }
+
+    case "calculate_thermal": {
+      const k = mockState.project.kozijnen.find((k) => k.id === args.id);
+      if (!k) return Promise.reject("Kozijn niet gevonden");
+      const fw = k.frame.frameWidth || 67;
+      const ow = k.frame.outerWidth;
+      const oh = k.frame.outerHeight;
+      const areaTotal = (ow * oh) / 1e6;
+      const iw = ow - 2 * fw;
+      const ih = oh - 2 * fw;
+      const areaInner = (iw * ih) / 1e6;
+      const areaFrame = areaTotal - areaInner;
+      const areaGlass = areaInner;
+      const ufValue = 1.8;
+      const ugValue = k.cells.length > 0 ? k.cells.reduce((s, c) => s + c.glazing.ugValue, 0) / k.cells.length : 1.0;
+      const psiValue = 0.04;
+      const glassPeri = k.cells.length * 2 * (iw / k.grid.columns.length + ih / k.grid.rows.length) / 1000;
+      const uwValue = areaTotal > 0 ? Math.round((areaFrame * ufValue + areaGlass * ugValue + glassPeri * psiValue) / areaTotal * 100) / 100 : 0;
+      const rating = uwValue < 1.3 ? "A" : uwValue < 1.8 ? "B" : uwValue < 2.5 ? "C" : "D";
+      return { uwValue, ufValue, ugValue, psiValue, areaFrameM2: Math.round(areaFrame * 1000) / 1000, areaGlassM2: Math.round(areaGlass * 1000) / 1000, areaTotalM2: Math.round(areaTotal * 1000) / 1000, glassPerimeterM: Math.round(glassPeri * 100) / 100, rating };
+    }
+
+    case "import_dxf_profile":
+      return JSON.stringify({ id: "imported-test", name: "Test profiel", width: 67, depth: 114 });
+
+    case "import_catalog":
+      return JSON.stringify([]);
 
     default:
       console.warn(`Mock: unknown command "${cmd}"`);

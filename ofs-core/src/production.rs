@@ -327,12 +327,24 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
 
         let cell_id = format!("{}-V{}", mark, i + 1);
 
+        // Determine sash dimensions for operable cells (affects glass size)
+        let sash_fw = cell.sash_width.unwrap_or(0.0); // 0 for fixed glass (no sash frame)
+        let has_sash = cell.panel_type.is_operable();
+
         match cell.panel_type {
             PanelType::FixedGlass | PanelType::TurnTilt | PanelType::Turn
             | PanelType::Tilt | PanelType::Sliding | PanelType::Door => {
-                // Glass
-                let glass_w = cell_w - 2.0 * GLASS_CLEARANCE_MM;
-                let glass_h = cell_h - 2.0 * GLASS_CLEARANCE_MM;
+                // Glass — for operable cells, subtract sash frame width
+                let glass_w = if has_sash && sash_fw > 0.0 {
+                    cell_w - 2.0 * sash_fw - 2.0 * GLASS_CLEARANCE_MM
+                } else {
+                    cell_w - 2.0 * GLASS_CLEARANCE_MM
+                };
+                let glass_h = if has_sash && sash_fw > 0.0 {
+                    cell_h - 2.0 * sash_fw - 2.0 * GLASS_CLEARANCE_MM
+                } else {
+                    cell_h - 2.0 * GLASS_CLEARANCE_MM
+                };
                 let area = (glass_w / 1000.0) * (glass_h / 1000.0);
                 glass_list.push(GlassListItem {
                     piece_id: cell_id.clone(),
@@ -376,24 +388,29 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
             }
         }
 
-        // Sash frame for operable cells
+        // Sash frame for operable cells — use cell.sash_profile if available
         if cell.panel_type.is_operable() {
             let sash_w = cell_w;
             let sash_h = cell_h;
             let sash_is_miter = is_miter;
             let sash_angle = angle;
+            let sash_frame_w = cell.sash_width.unwrap_or(54.0);
 
             let (sash_stile_net, sash_rail_net) = if sash_is_miter {
-                (sash_h - 2.0 * fw, sash_w - 2.0 * fw)
+                (sash_h - 2.0 * sash_frame_w, sash_w - 2.0 * sash_frame_w)
             } else {
-                (sash_h, sash_w - 2.0 * fw)
+                (sash_h, sash_w - 2.0 * sash_frame_w)
             };
+
+            let sash_profile_name = cell.sash_profile.as_ref()
+                .map(|p| p.name.clone())
+                .unwrap_or_else(|| format!("Raamhout {}", profile_name));
 
             // Sash stiles (left + right)
             cut_list.push(CutListItem {
                 piece_id: format!("{}-RSL", cell_id),
                 member_type: MemberType::SashLeft,
-                profile_name: format!("Raamhout {}", profile_name),
+                profile_name: sash_profile_name.clone(),
                 material: mat_name.clone(),
                 net_length_mm: sash_stile_net,
                 gross_length_mm: gross_length(sash_stile_net, mat, sash_is_miter),
@@ -404,7 +421,7 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
             cut_list.push(CutListItem {
                 piece_id: format!("{}-RSR", cell_id),
                 member_type: MemberType::SashRight,
-                profile_name: format!("Raamhout {}", profile_name),
+                profile_name: sash_profile_name.clone(),
                 material: mat_name.clone(),
                 net_length_mm: sash_stile_net,
                 gross_length_mm: gross_length(sash_stile_net, mat, sash_is_miter),
@@ -417,7 +434,7 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
             cut_list.push(CutListItem {
                 piece_id: format!("{}-RDB", cell_id),
                 member_type: MemberType::SashTop,
-                profile_name: format!("Raamhout {}", profile_name),
+                profile_name: sash_profile_name.clone(),
                 material: mat_name.clone(),
                 net_length_mm: sash_rail_net,
                 gross_length_mm: gross_length(sash_rail_net, mat, sash_is_miter),
@@ -428,7 +445,7 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
             cut_list.push(CutListItem {
                 piece_id: format!("{}-RDO", cell_id),
                 member_type: MemberType::SashBottom,
-                profile_name: format!("Raamhout {}", profile_name),
+                profile_name: sash_profile_name.clone(),
                 material: mat_name.clone(),
                 net_length_mm: sash_rail_net,
                 gross_length_mm: gross_length(sash_rail_net, mat, sash_is_miter),

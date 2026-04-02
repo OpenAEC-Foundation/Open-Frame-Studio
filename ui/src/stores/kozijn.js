@@ -19,11 +19,12 @@ export async function createKozijn(name, mark, width, height) {
   return k;
 }
 
-export async function createFromTemplate(template, width, height) {
+export async function createFromTemplate(template, width, height, sjabloonId) {
   const k = await invoke("create_kozijn_from_template", {
     template,
     width,
     height,
+    sjabloonId: sjabloonId || null,
   });
   await refreshProject();
   currentKozijn.set(k);
@@ -190,6 +191,54 @@ export async function updateSecurityClass(cellIndex, securityClass) {
   });
   currentKozijn.set(updated);
   await refreshProject();
+}
+
+export async function updateCellGlazing(cellIndex, glazing) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_cell_glazing", {
+    id: k.id,
+    cellIndex,
+    glazingJson: JSON.stringify(glazing),
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
+}
+
+export async function updateFrameColors(colorInside, colorOutside) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_frame_colors", {
+    id: k.id,
+    colorInside,
+    colorOutside,
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
+}
+
+export async function duplicateKozijn(newMark) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  const dup = await invoke("duplicate_kozijn", { id: k.id, newMark });
+  await refreshProject();
+  currentKozijn.set(dup);
+  selectedCellIndex.set(null);
+  await refreshGeometry(dup.id);
+  return dup;
+}
+
+export async function calculateThermal() {
+  const k = get(currentKozijn);
+  if (!k) return null;
+  try {
+    return await invoke("calculate_thermal", { id: k.id });
+  } catch (e) {
+    console.error("Thermische berekening mislukt:", e);
+    return null;
+  }
 }
 
 export async function removeKozijn(id) {

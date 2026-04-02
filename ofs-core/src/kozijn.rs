@@ -16,6 +16,9 @@ pub struct Kozijn {
     pub cells: Vec<Cell>,
     #[serde(default)]
     pub placement: Placement,
+    /// Series/batch reference (e.g., "Begane grond", "Verdieping 1")
+    #[serde(default)]
+    pub series_id: Option<String>,
 }
 
 impl Kozijn {
@@ -54,7 +57,58 @@ impl Kozijn {
             },
             cells: vec![Cell::default()],
             placement: Placement::default(),
+            series_id: None,
         }
+    }
+
+    /// Create a new kozijn using a sjabloon (template) for automatic profile assignment
+    pub fn new_with_sjabloon(name: &str, mark: &str, width: f64, height: f64, sj: &crate::template::KozijnSjabloon) -> Self {
+        let fw = sj.frame_width;
+        let id = Uuid::new_v4();
+        Self {
+            id,
+            name: name.to_string(),
+            mark: mark.to_string(),
+            frame: Frame {
+                outer_width: width,
+                outer_height: height,
+                material: sj.material.clone(),
+                profile: sj.stijl_profile.clone(),
+                sill_profile: Some(sj.onderdorpel_profile.clone()),
+                color_inside: sj.color_inside.clone(),
+                color_outside: sj.color_outside.clone(),
+                frame_width: fw,
+                frame_depth: sj.frame_depth,
+                sill: None,
+                top_profile: Some(sj.bovendorpel_profile.clone()),
+                bottom_profile: Some(sj.onderdorpel_profile.clone()),
+                left_profile: Some(sj.stijl_profile.clone()),
+                right_profile: Some(sj.stijl_profile.clone()),
+                shape: FrameShape::default(),
+            },
+            grid: Grid {
+                columns: vec![GridDivision {
+                    size: width - 2.0 * fw,
+                    divider_profile: None,
+                }],
+                rows: vec![GridDivision {
+                    size: height - 2.0 * fw,
+                    divider_profile: None,
+                }],
+            },
+            cells: vec![Cell::default_with_glazing(&sj.default_glazing)],
+            placement: Placement::default(),
+            series_id: None,
+        }
+    }
+
+    /// Duplicate this kozijn with a new mark and UUID
+    pub fn duplicate(&self, new_mark: &str) -> Self {
+        let mut clone = self.clone();
+        clone.id = Uuid::new_v4();
+        clone.mark = new_mark.to_string();
+        clone.name = format!("{} (kopie)", self.name);
+        clone
     }
 
     /// Recalculate cells after grid changes
@@ -185,6 +239,15 @@ pub struct FrameShape {
     /// Arch rise height above the rectangular top in mm
     #[serde(default)]
     pub arch_height: Option<f64>,
+    /// Trapezoid: top width (can differ from outer_width)
+    #[serde(default)]
+    pub top_width: Option<f64>,
+    /// Trapezoid: left stile angle in degrees (90 = vertical)
+    #[serde(default)]
+    pub left_angle: Option<f64>,
+    /// Trapezoid: right stile angle in degrees (90 = vertical)
+    #[serde(default)]
+    pub right_angle: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -192,9 +255,10 @@ pub struct FrameShape {
 pub enum ShapeType {
     #[default]
     Rectangular,
-    Arched,    // getoogde bovendorpel (segmentboog)
-    Round,     // volledig rond (cirkel)
+    Arched,      // getoogde bovendorpel (segmentboog)
+    Round,       // volledig rond (cirkel)
     Elliptical,
+    Trapezoid,   // schuine stijl(en) of dorpel
 }
 
 /// Grid subdivision — columns (vertical) and rows (horizontal)
@@ -227,6 +291,15 @@ pub struct Cell {
     /// Structured hardware set (format_version "1.1"+)
     #[serde(default)]
     pub hardware_set: Option<HardwareSet>,
+    /// Sash/door profile for operable cells (raamhout/deurhout)
+    #[serde(default)]
+    pub sash_profile: Option<ProfileRef>,
+    /// Sash wood width in mm (54/67mm typical)
+    #[serde(default)]
+    pub sash_width: Option<f64>,
+    /// Sash wood depth in mm (67/78/90mm typical)
+    #[serde(default)]
+    pub sash_depth: Option<f64>,
 }
 
 impl Default for Cell {
@@ -237,6 +310,46 @@ impl Default for Cell {
             glazing: Glazing::default(),
             hardware: vec![],
             hardware_set: None,
+            sash_profile: None,
+            sash_width: None,
+            sash_depth: None,
+        }
+    }
+}
+
+impl Cell {
+    /// Create a cell with glazing preset from a sjabloon
+    pub fn default_with_glazing(preset: &crate::template::GlazingPreset) -> Self {
+        Self {
+            glazing: Glazing {
+                glass_type: preset.glass_type.clone(),
+                thickness_mm: preset.thickness_mm,
+                ug_value: preset.ug_value,
+                panes: vec![],
+                spacer_type: preset.spacer_type.clone(),
+            },
+            ..Self::default()
+        }
+    }
+
+    /// Assign sash profile for operable cells (raamhout/deurhout)
+    pub fn assign_sash_from_sjabloon(&mut self, sj: &crate::template::KozijnSjabloon) {
+        match self.panel_type {
+            PanelType::TurnTilt | PanelType::Turn | PanelType::Tilt | PanelType::Sliding => {
+                self.sash_profile = Some(sj.raamhout_profile.clone());
+                self.sash_width = Some(sj.sash_width);
+                self.sash_depth = Some(sj.sash_depth);
+            }
+            PanelType::Door => {
+                self.sash_profile = Some(sj.deurhout_profile.clone());
+                self.sash_width = Some(sj.frame_width); // deurhout = kozijnhout breedte
+                self.sash_depth = Some(sj.frame_depth);
+            }
+            _ => {
+                self.sash_profile = None;
+                self.sash_width = None;
+                self.sash_depth = None;
+            }
         }
     }
 }
@@ -291,6 +404,25 @@ pub struct Glazing {
     pub glass_type: String,
     pub thickness_mm: f64,
     pub ug_value: f64,
+    /// Individual pane layers (glass + spacer + glass + ...)
+    #[serde(default)]
+    pub panes: Vec<Pane>,
+    /// Spacer type between panes
+    #[serde(default = "default_spacer_type")]
+    pub spacer_type: String,
+}
+
+fn default_spacer_type() -> String {
+    "warm-edge".into()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Pane {
+    /// Pane thickness in mm (4, 5, 6, 8, 10)
+    pub thickness_mm: f64,
+    /// Pane type: "float", "gehard", "gelamineerd", "low-e"
+    pub pane_type: String,
 }
 
 impl Default for Glazing {
@@ -299,6 +431,11 @@ impl Default for Glazing {
             glass_type: "HR++".into(),
             thickness_mm: 24.0,
             ug_value: 1.0,
+            panes: vec![
+                Pane { thickness_mm: 4.0, pane_type: "float".into() },
+                Pane { thickness_mm: 4.0, pane_type: "low-e".into() },
+            ],
+            spacer_type: "warm-edge".into(),
         }
     }
 }
@@ -372,6 +509,7 @@ impl Project {
                 number: number.to_string(),
                 client: String::new(),
                 address: String::new(),
+                series: vec![],
             },
             kozijnen: vec![],
             vliesgevels: vec![],
@@ -387,4 +525,17 @@ pub struct ProjectInfo {
     pub number: String,
     pub client: String,
     pub address: String,
+    /// Project series / building phases
+    #[serde(default)]
+    pub series: Vec<Series>,
+}
+
+/// A series / building phase for organizing kozijnen
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Series {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub description: String,
 }

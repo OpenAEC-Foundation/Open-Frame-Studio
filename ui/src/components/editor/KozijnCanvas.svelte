@@ -3,6 +3,7 @@
 
   export let geometry;
   export let kozijn;
+  export let zoom = 0.35;
 
   const FRAME_MEMBER_NAMES = ["frame_top", "frame_bottom", "frame_left", "frame_right"];
 
@@ -77,11 +78,20 @@
 
 <g>
   <!-- Frame members (outer border) -->
-  {#each geometry.frameRects as rect}
+  {#each geometry.frameRects as rect, i}
+    {@const memberType = FRAME_MEMBER_NAMES[i]}
+    {@const isSelected = $selectedMember?.type === memberType}
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <rect
       x={rect.x} y={rect.y}
       width={rect.width} height={rect.height}
       fill="var(--editor-frame)"
+      stroke={isSelected ? "var(--editor-selected)" : "none"}
+      stroke-width={isSelected ? 3 : 0}
+      class="member"
+      on:click={(e) => handleMemberClick(memberType, i, e)}
+      role="button"
+      tabindex="0"
     />
   {/each}
 
@@ -151,48 +161,89 @@
   {/each}
 
   <!-- Vertical dividers -->
-  {#each geometry.vDividers as rect}
+  {#each geometry.vDividers as rect, i}
+    {@const isSelected = $selectedMember?.type === "divider_v" && $selectedMember?.index === i}
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <rect
       x={rect.x} y={rect.y}
       width={rect.width} height={rect.height}
       fill="var(--editor-frame)"
+      stroke={isSelected ? "var(--editor-selected)" : "none"}
+      stroke-width={isSelected ? 3 : 0}
+      class="member"
+      on:click={(e) => handleMemberClick("divider_v", i, e)}
+      role="button"
+      tabindex="0"
     />
   {/each}
 
   <!-- Horizontal dividers -->
-  {#each geometry.hDividers as rect}
+  {#each geometry.hDividers as rect, i}
+    {@const isSelected = $selectedMember?.type === "divider_h" && $selectedMember?.index === i}
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <rect
       x={rect.x} y={rect.y}
       width={rect.width} height={rect.height}
       fill="var(--editor-frame)"
+      stroke={isSelected ? "var(--editor-selected)" : "none"}
+      stroke-width={isSelected ? 3 : 0}
+      class="member"
+      on:click={(e) => handleMemberClick("divider_h", i, e)}
+      role="button"
+      tabindex="0"
     />
   {/each}
 
-  <!-- Dimension lines -->
+  <!-- Dimension lines — rendered in model-space with inverse-zoom for constant screen size -->
   {#each geometry.dimensions as dim}
-    <line
-      x1={dim.x1} y1={dim.y1}
-      x2={dim.x2} y2={dim.y2}
-      stroke="var(--editor-dimension)"
-      stroke-width="0.5"
-    />
+    {@const fontSize = 12 / zoom}
+    {@const sw = 1 / zoom}
+    {@const tick = 6 / zoom}
+    {@const bgPad = 3 / zoom}
+    {@const isH = dim.side === "bottom" || dim.side === "top"}
+    {@const midX = (dim.x1 + dim.x2) / 2}
+    {@const midY = (dim.y1 + dim.y2) / 2}
+
+    <!-- Dimension line -->
+    <line x1={dim.x1} y1={dim.y1} x2={dim.x2} y2={dim.y2}
+      stroke="var(--editor-dimension)" stroke-width={sw} />
+
     <!-- Tick marks -->
-    {#if dim.side === "bottom" || dim.side === "top"}
-      <line x1={dim.x1} y1={dim.y1 - 3} x2={dim.x1} y2={dim.y1 + 3} stroke="var(--editor-dimension)" stroke-width="0.5"/>
-      <line x1={dim.x2} y1={dim.y2 - 3} x2={dim.x2} y2={dim.y2 + 3} stroke="var(--editor-dimension)" stroke-width="0.5"/>
+    {#if isH}
+      <line x1={dim.x1} y1={dim.y1 - tick} x2={dim.x1} y2={dim.y1 + tick} stroke="var(--editor-dimension)" stroke-width={sw}/>
+      <line x1={dim.x2} y1={dim.y2 - tick} x2={dim.x2} y2={dim.y2 + tick} stroke="var(--editor-dimension)" stroke-width={sw}/>
     {:else}
-      <line x1={dim.x1 - 3} y1={dim.y1} x2={dim.x1 + 3} y2={dim.y1} stroke="var(--editor-dimension)" stroke-width="0.5"/>
-      <line x1={dim.x2 - 3} y1={dim.y2} x2={dim.x2 + 3} y2={dim.y2} stroke="var(--editor-dimension)" stroke-width="0.5"/>
+      <line x1={dim.x1 - tick} y1={dim.y1} x2={dim.x1 + tick} y2={dim.y1} stroke="var(--editor-dimension)" stroke-width={sw}/>
+      <line x1={dim.x2 - tick} y1={dim.y2} x2={dim.x2 + tick} y2={dim.y2} stroke="var(--editor-dimension)" stroke-width={sw}/>
     {/if}
-    <!-- Label -->
+
+    <!-- Label background for readability -->
+    {@const labelW = dim.label.length * fontSize * 0.6 + bgPad * 2}
+    {@const labelH = fontSize + bgPad * 2}
+    {#if isH}
+      <rect
+        x={midX - labelW / 2} y={midY - labelH - bgPad}
+        width={labelW} height={labelH}
+        fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
+      />
+    {:else}
+      <rect
+        x={midX + bgPad} y={midY - labelH / 2}
+        width={labelW} height={labelH}
+        fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
+      />
+    {/if}
+
+    <!-- Label text -->
     <text
-      x={(dim.x1 + dim.x2) / 2}
-      y={(dim.y1 + dim.y2) / 2}
+      x={isH ? midX : midX + bgPad + labelW / 2}
+      y={isH ? midY - bgPad - fontSize * 0.15 : midY}
       text-anchor="middle"
-      dominant-baseline="central"
+      dominant-baseline={isH ? "auto" : "central"}
       fill="var(--editor-dimension)"
-      font-size="9"
+      font-size={fontSize}
       font-family="var(--font-body)"
+      font-weight="600"
     >
       {dim.label}
     </text>
@@ -206,6 +257,16 @@
   }
 
   .cell:hover {
+    stroke: var(--amber);
+    stroke-width: 2;
+  }
+
+  .member {
+    cursor: pointer;
+    transition: stroke 0.15s, stroke-width 0.15s;
+  }
+
+  .member:hover {
     stroke: var(--amber);
     stroke-width: 2;
   }
