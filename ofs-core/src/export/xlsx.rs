@@ -6,7 +6,6 @@ use crate::kozijn::{Material, Project, WoodType};
 use crate::production::ProductionData;
 
 const DEEP_FORGE: u32 = 0x36363E;
-const AMBER: u32 = 0xD97706;
 const ALT_BG: u32 = 0xF9FAFB;
 const BORDER_COLOR: u32 = 0xE5E7EB;
 

@@ -124,7 +124,7 @@ pub struct CostLineItem {
 }
 
 /// Estimate labor hours based on kozijn complexity.
-fn estimate_labor_hours(kozijn: &Kozijn, production: &ProductionData) -> f64 {
+fn estimate_labor_hours(kozijn: &Kozijn, _production: &ProductionData) -> f64 {
     let num_cells = kozijn.cells.len();
     let num_operable = kozijn.cells.iter()
         .filter(|c| c.panel_type.is_operable())

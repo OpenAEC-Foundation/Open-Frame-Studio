@@ -1,5 +1,5 @@
 use crate::state::AppState;
-use ofs_core::vliesgevel::{CurtainPanel, CurtainPanelType, Vliesgevel};
+use ofs_core::vliesgevel::{CurtainPanelType, Vliesgevel};
 use ofs_core::vliesgevel::geometry::{compute_vliesgevel_2d, VliesgevelGeometry2D};
 use ofs_core::vliesgevel::grid;
 use ofs_core::vliesgevel::production::{compute_vliesgevel_production, VliesgevalProductionData};

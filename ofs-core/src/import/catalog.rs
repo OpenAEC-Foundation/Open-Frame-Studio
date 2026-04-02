@@ -1,7 +1,6 @@
 //! Parse profile catalogs from JSON, CSV, or Excel files.
 
 use std::collections::HashMap;
-use std::io::{BufRead, BufReader};
 
 use crate::import::dxf_profile::Sponning;
 

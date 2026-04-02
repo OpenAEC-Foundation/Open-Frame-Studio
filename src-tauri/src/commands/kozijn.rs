@@ -227,7 +227,7 @@ pub fn update_member_profile(
     profile_id: String,
     profile_name: String,
     profile_width: Option<f64>,
-    profile_depth: Option<f64>,
+    _profile_depth: Option<f64>,
 ) -> Result<Kozijn, String> {
     let mut project = state.project.lock().map_err(|e| e.to_string())?;
     let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
@@ -262,7 +262,7 @@ pub fn update_member_profile(
 
     // Update frame dimensions if width/depth provided (for frame members only)
     if member_type.starts_with("frame") {
-        if let Some(w) = profile_width {
+        if let Some(_w) = profile_width {
             // Don't change frame_width globally — that affects all members
             // Per-member width would need geometry changes (future)
         }

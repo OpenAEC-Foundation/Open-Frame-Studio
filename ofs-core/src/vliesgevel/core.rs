@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::hardware::HardwareSet;
-use crate::kozijn::{Glazing, Material, OpeningDirection, PanelType, Placement};
+use crate::kozijn::{Glazing, Material, OpeningDirection, Placement};
 use crate::profile::ProfileRef;
 
 /// A curtain wall (vliesgevel) — non-load-bearing facade hung from the building structure.

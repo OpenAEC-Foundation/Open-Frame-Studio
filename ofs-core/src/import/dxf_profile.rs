@@ -190,10 +190,6 @@ fn parse_lwpolyline_entity(lines: &[String], start: usize) -> (Vec<(f64, f64)>, 
         }
         match lines[i].as_str() {
             "10" => {
-                // Flush previous point if we have a new X
-                if let (Some(x), Some(y)) = (current_x, None::<f64>) {
-                    // Wait for Y
-                }
                 current_x = lines[i + 1].parse().ok();
             }
             "20" => {

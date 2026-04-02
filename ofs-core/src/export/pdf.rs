@@ -4,7 +4,7 @@
 
 use printpdf::*;
 
-use crate::kozijn::{Kozijn, Material, PanelType, Project, WoodType, OpeningDirection};
+use crate::kozijn::{Kozijn, Material, PanelType, Project, WoodType};
 use crate::production::ProductionData;
 
 const DEEP_FORGE: (f32, f32, f32) = (0.212, 0.212, 0.243);
@@ -169,14 +169,24 @@ pub fn generate_workshop_pdf(
     // Title block
     ops.extend(fill_rect_ops(margin, margin, daw, tb_h, DEEP_FORGE));
     ops.extend(line_ops(margin, margin + tb_h, margin + daw, margin + tb_h, AMBER, 3.0));
+    let pi = &project.project_info;
     ops.extend(text_ops("Open Frame Studio", 14.0, margin + 8.0, margin + tb_h - 14.0, font_bold(), WHITE_C));
     ops.extend(text_ops("OpenAEC Foundation", 8.0, margin + 8.0, margin + tb_h - 20.0, font(), AMBER));
 
-    let kx = margin + 180.0;
+    // Project info
+    let px = margin + 90.0;
+    ops.extend(text_ops(&pi.name, 10.0, px, margin + tb_h - 14.0, font_bold(), WHITE_C));
+    ops.extend(text_ops(
+        &format!("Nr: {} | {}", pi.number, pi.client),
+        8.0, px, margin + tb_h - 22.0, font(), (0.8, 0.8, 0.8),
+    ));
+
+    // Kozijn info
+    let kx = margin + 220.0;
     ops.extend(text_ops(&kozijn.mark, 16.0, kx, margin + tb_h - 20.0, font_bold(), AMBER));
     ops.extend(text_ops(&kozijn.name, 9.0, kx + 30.0, margin + tb_h - 18.0, font(), WHITE_C));
     ops.extend(text_ops(
-        &format!("{} x {} mm", ow as i64, oh as i64),
+        &format!("{} x {} mm | {}", ow as i64, oh as i64, mat_label(&frame.material)),
         8.0, kx, margin + tb_h - 28.0, font(), (0.8, 0.8, 0.8),
     ));
 
