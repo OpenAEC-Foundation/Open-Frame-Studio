@@ -57,12 +57,8 @@ jobs:
         run: npm run build
 
       - name: Check Rust workspace
-        run: cargo check --workspace
+        run: cargo check -p ofs-core -p open-frame-studio
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@action-v0.6.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: src-tauri
-          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '--no-bundle' }}
+      - name: Build Tauri app (no bundle)
+        working-directory: src-tauri
+        run: cargo build

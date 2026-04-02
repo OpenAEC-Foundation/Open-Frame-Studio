@@ -10,5 +10,6 @@ crate-type = ["cdylib", "rlib"]
 ofs-core = { path = "../ofs-core", default-features = false }
 serde.workspace = true
 serde_json.workspace = true
-uuid.workspace = true
+uuid = { version = "1", features = ["v4", "serde", "js"] }
 wasm-bindgen = "0.2"
+getrandom = { version = "0.2", features = ["js"] }
