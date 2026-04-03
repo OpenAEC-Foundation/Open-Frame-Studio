@@ -11,7 +11,7 @@
 
 <div class="overview">
   <h3>{$_('project.kozijnen')}</h3>
-  {#if $kozijnen.length === 0}
+  {#if !$kozijnen || $kozijnen.length === 0}
     <p class="empty">{$_('project.noKozijnen')}</p>
   {:else}
     <div class="list">

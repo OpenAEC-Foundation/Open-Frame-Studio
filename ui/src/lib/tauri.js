@@ -88,9 +88,9 @@ function wasmCommand(cmd, args) {
       case "get_sjablonen":
         return "[]";
 
-      case "get_all_vliesgevels": return "[]";
-      case "get_cost_estimate": return JSON.stringify({ items: [], total: 0 });
-      case "get_cost_estimate_project": return JSON.stringify([]);
+      case "get_all_vliesgevels": return [];
+      case "get_cost_estimate": return { items: [], total: 0 };
+      case "get_cost_estimate_project": return [];
 
       case "get_platform": return "web";
       case "load_settings":
@@ -122,16 +122,16 @@ function wasmCommand(cmd, args) {
 function browserFallback(cmd, args) {
   switch (cmd) {
     case "get_project":
-      return JSON.stringify({
+      return {
         formatVersion: "1.3",
         projectInfo: { name: "Demo", number: "", client: "", address: "" },
         kozijnen: [], vliesgevels: [], customProfiles: [],
-      });
+      };
     case "new_project": return browserFallback("get_project");
-    case "get_all_kozijnen": return "[]";
-    case "get_all_vliesgevels": return "[]";
-    case "load_profile_library": return "[]";
-    case "get_sjablonen": return "[]";
+    case "get_all_kozijnen": return [];
+    case "get_all_vliesgevels": return [];
+    case "load_profile_library": return [];
+    case "get_sjablonen": return [];
     case "get_platform": return "web";
     case "load_settings":
       return localStorage.getItem("ofs-settings") || JSON.stringify({
