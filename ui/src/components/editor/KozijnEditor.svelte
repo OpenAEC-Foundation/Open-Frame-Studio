@@ -1,9 +1,10 @@
 <script>
-  import { currentKozijn, currentGeometry, selectedCellIndex, updateGridSizes } from "../../stores/kozijn.js";
+  import { currentKozijn, currentGeometry, selectedCellIndex, updateGridSizes, addColumn, addRow } from "../../stores/kozijn.js";
   import { zoom, editorPan } from "../../stores/ui.js";
   import { _ } from "svelte-i18n";
   import KozijnCanvas from "./KozijnCanvas.svelte";
   import GridHandles from "./GridHandles.svelte";
+  import { get } from "svelte/store";
 
   let containerEl;
   let isPanning = false;
@@ -86,6 +87,43 @@
     await updateGridSizes(columnSizes, rowSizes);
   }
 
+  // Double-click on canvas to add a column or row at click position
+  function handleCanvasDblClick(e) {
+    const k = get(currentKozijn);
+    const geom = get(currentGeometry);
+    if (!k || !geom || !containerEl) return;
+
+    const rect = containerEl.getBoundingClientRect();
+    const z = get(zoom);
+    const pan = get(editorPan);
+
+    // Convert screen coords to model-space (mm)
+    const mx = (e.clientX - rect.left - pan.x) / z;
+    const my = (e.clientY - rect.top - pan.y) / z;
+
+    const fw = k.frame.frameWidth;
+    const ow = k.frame.outerWidth;
+    const oh = k.frame.outerHeight;
+
+    // Check if click is inside the inner frame area
+    if (mx < fw || mx > ow - fw || my < fw || my > oh - fw) return;
+
+    // Determine if we should add a column or row based on proximity to edges
+    const relX = mx - fw;  // position within inner area
+    const relY = my - fw;
+    const innerW = ow - 2 * fw;
+    const innerH = oh - 2 * fw;
+
+    // Use Alt+DblClick for row, normal DblClick for column
+    if (e.altKey) {
+      // Add horizontal row at Y position
+      addRow(my);
+    } else {
+      // Add vertical column at X position
+      addColumn(mx);
+    }
+  }
+
   // Export for use in Beeld tab
   export { zoomToFit };
 </script>
@@ -101,7 +139,8 @@
   role="application"
 >
   {#if $currentKozijn && $currentGeometry}
-    <svg class="canvas" xmlns="http://www.w3.org/2000/svg">
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <svg class="canvas" xmlns="http://www.w3.org/2000/svg" ondblclick={handleCanvasDblClick}>
       <g transform="translate({$editorPan.x}, {$editorPan.y}) scale({$zoom})">
         <KozijnCanvas geometry={$currentGeometry} kozijn={$currentKozijn} zoom={$zoom} />
         <GridHandles geometry={$currentGeometry} kozijn={$currentKozijn} onresize={handleGridResize} />

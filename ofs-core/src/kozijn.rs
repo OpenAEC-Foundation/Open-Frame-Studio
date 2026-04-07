@@ -255,10 +255,11 @@ pub struct FrameShape {
 pub enum ShapeType {
     #[default]
     Rectangular,
-    Arched,      // getoogde bovendorpel (segmentboog)
-    Round,       // volledig rond (cirkel)
+    Arched,         // getoogde bovendorpel (segmentboog)
+    Round,          // volledig rond (cirkel)
     Elliptical,
-    Trapezoid,   // schuine stijl(en) of dorpel
+    Trapezoid,      // schuine stijl(en) of dorpel
+    ArchedTrapezoid, // boog + schuine stijlen gecombineerd (CNCware-stijl)
 }
 
 /// Grid subdivision — columns (vertical) and rows (horizontal)

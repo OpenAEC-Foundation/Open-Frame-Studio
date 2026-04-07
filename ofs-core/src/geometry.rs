@@ -326,9 +326,37 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
             });
         }
     } else if kozijn.frame.shape.shape_type == ShapeType::Trapezoid {
-        // Trapezoid: schuine stijlen met verschillende boven- en onderbreedte
-        // left_angle/right_angle in degrees from vertical (90 = vertical, <90 = leaning inward)
-        // top_width can differ from outer_width
+        // Trapezoid only — no arc, just angled stiles
+    } else if kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid {
+        // Combined: arched top + angled stiles (CNCware-style)
+        let arch_height = kozijn.frame.shape.arch_height.unwrap_or(ow / 4.0);
+        let half_w = ow / 2.0;
+        let radius = (half_w * half_w) / (2.0 * arch_height) + arch_height / 2.0;
+        let center_y = oh - arch_height + radius;
+
+        // Outer arc (arch above the rectangular part)
+        let start_angle = ((half_w / radius).asin()).to_degrees();
+        arcs.push(Arc2D {
+            cx: half_w,
+            cy: center_y,
+            radius,
+            start_angle: 180.0 - start_angle,
+            end_angle: start_angle,
+            stroke_width: fw,
+        });
+
+        // Inner arc
+        let inner_radius = radius - fw;
+        if inner_radius > 0.0 {
+            arcs.push(Arc2D {
+                cx: half_w,
+                cy: center_y,
+                radius: inner_radius,
+                start_angle: 180.0 - start_angle,
+                end_angle: start_angle,
+                stroke_width: 1.0,
+            });
+        }
     } else if kozijn.frame.shape.shape_type == ShapeType::Round {
         let radius = ow.min(oh) / 2.0;
         arcs.push(Arc2D {
@@ -344,7 +372,9 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     // Trapezoid polygon computation
     let mut trapezoid_outer = Vec::new();
     let mut trapezoid_inner = Vec::new();
-    if kozijn.frame.shape.shape_type == ShapeType::Trapezoid {
+    if kozijn.frame.shape.shape_type == ShapeType::Trapezoid
+        || kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid
+    {
         let top_w = kozijn.frame.shape.top_width.unwrap_or(ow * 0.6);
         let left_angle_deg = kozijn.frame.shape.left_angle.unwrap_or(90.0);
         let right_angle_deg = kozijn.frame.shape.right_angle.unwrap_or(90.0);

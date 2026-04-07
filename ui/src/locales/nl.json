@@ -113,6 +113,7 @@
   "props.arched": "Getoogd (segmentboog)",
   "props.round": "Rond",
   "props.trapezoid": "Trapezium (schuine stijlen)",
+  "props.archedTrapezoid": "Boog + trapezium",
   "props.archHeight": "Booghoogte (mm)",
   "props.leftAngle": "Hoek links (°)",
   "props.rightAngle": "Hoek rechts (°)",

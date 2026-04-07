@@ -209,9 +209,10 @@
           <option value="arched">{$_('props.arched')}</option>
           <option value="round">{$_('props.round')}</option>
           <option value="trapezoid">{$_('props.trapezoid') || "Trapezium (schuine stijlen)"}</option>
+          <option value="arched_trapezoid">{$_('props.archedTrapezoid') || "Boog + trapezium"}</option>
         </select>
       </div>
-      {#if $currentKozijn.frame.shape?.shapeType === "arched"}
+      {#if $currentKozijn.frame.shape?.shapeType === "arched" || $currentKozijn.frame.shape?.shapeType === "arched_trapezoid"}
         <div class="field">
           <label>{$_('props.archHeight')}</label>
           <input
@@ -224,7 +225,7 @@
           />
         </div>
       {/if}
-      {#if $currentKozijn.frame.shape?.shapeType === "trapezoid"}
+      {#if $currentKozijn.frame.shape?.shapeType === "trapezoid" || $currentKozijn.frame.shape?.shapeType === "arched_trapezoid"}
         <div class="field-row">
           <div class="field">
             <label>{$_('props.leftAngle') || "Hoek links (°)"}</label>
