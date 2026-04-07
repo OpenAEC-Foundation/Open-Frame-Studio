@@ -50,6 +50,12 @@ pub struct KozijnGeometry2D {
     /// Arcs (for arched/round frame shapes)
     #[serde(default)]
     pub arcs: Vec<Arc2D>,
+    /// Trapezoid outer polygon points [[x,y], ...] (for trapezoid frame shapes)
+    #[serde(default)]
+    pub trapezoid_outer: Vec<[f64; 2]>,
+    /// Trapezoid inner polygon points [[x,y], ...] (for trapezoid frame shapes)
+    #[serde(default)]
+    pub trapezoid_inner: Vec<[f64; 2]>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -319,6 +325,10 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
                 stroke_width: 1.0, // thin line for inner edge
             });
         }
+    } else if kozijn.frame.shape.shape_type == ShapeType::Trapezoid {
+        // Trapezoid: schuine stijlen met verschillende boven- en onderbreedte
+        // left_angle/right_angle in degrees from vertical (90 = vertical, <90 = leaning inward)
+        // top_width can differ from outer_width
     } else if kozijn.frame.shape.shape_type == ShapeType::Round {
         let radius = ow.min(oh) / 2.0;
         arcs.push(Arc2D {
@@ -331,6 +341,40 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         });
     }
 
+    // Trapezoid polygon computation
+    let mut trapezoid_outer = Vec::new();
+    let mut trapezoid_inner = Vec::new();
+    if kozijn.frame.shape.shape_type == ShapeType::Trapezoid {
+        let top_w = kozijn.frame.shape.top_width.unwrap_or(ow * 0.6);
+        let left_angle_deg = kozijn.frame.shape.left_angle.unwrap_or(90.0);
+        let right_angle_deg = kozijn.frame.shape.right_angle.unwrap_or(90.0);
+
+        // Offset from bottom edge to top edge based on angle
+        // At 90°: offset = 0 (vertical). At <90°: offset > 0 (leaning inward)
+        let left_offset = if left_angle_deg >= 89.9 { 0.0 } else {
+            oh * (90.0 - left_angle_deg).to_radians().tan()
+        };
+        let right_offset = if right_angle_deg >= 89.9 { 0.0 } else {
+            oh * (90.0 - right_angle_deg).to_radians().tan()
+        };
+
+        // Outer polygon (clockwise from bottom-left)
+        trapezoid_outer = vec![
+            [0.0, oh],                              // bottom-left
+            [ow, oh],                               // bottom-right
+            [ow - right_offset, 0.0],               // top-right
+            [left_offset, 0.0],                     // top-left
+        ];
+
+        // Inner polygon (inside frame members)
+        trapezoid_inner = vec![
+            [fw, oh - fw],                          // bottom-left inner
+            [ow - fw, oh - fw],                     // bottom-right inner
+            [ow - right_offset - fw + (fw * right_offset / oh), fw],  // top-right inner
+            [left_offset + fw - (fw * left_offset / oh), fw],         // top-left inner
+        ];
+    }
+
     KozijnGeometry2D {
         outer_rect,
         inner_rect,
@@ -340,5 +384,7 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         cell_rects,
         dimensions,
         arcs,
+        trapezoid_outer,
+        trapezoid_inner,
     }
 }

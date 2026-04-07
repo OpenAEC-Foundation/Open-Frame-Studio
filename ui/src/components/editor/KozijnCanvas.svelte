@@ -1,7 +1,125 @@
 <script>
-  import { selectedCellIndex, selectedMember, updateCellType } from "../../stores/kozijn.js";
+  import { selectedCellIndex, selectedMember, updateCellType, updateDimensions, updateGridSizes, currentKozijn } from "../../stores/kozijn.js";
+  import { get } from "svelte/store";
 
   let { geometry, kozijn, zoom = 0.35 } = $props();
+
+  // Inline dimension editing state
+  let editingDim = $state(null); // { index, value, x, y, isH, width, height }
+  let editInputEl = $state(null);
+
+  function handleDimClick(dimIndex, e) {
+    e.stopPropagation();
+    const dim = geometry.dimensions[dimIndex];
+    const isH = dim.side === "bottom" || dim.side === "top";
+    const midX = (dim.x1 + dim.x2) / 2;
+    const midY = (dim.y1 + dim.y2) / 2;
+    const val = Math.round(Number(dim.label));
+
+    editingDim = { index: dimIndex, value: val, x: midX, y: midY, isH };
+
+    // Focus input after render
+    requestAnimationFrame(() => {
+      if (editInputEl) {
+        editInputEl.focus();
+        editInputEl.select();
+      }
+    });
+  }
+
+  function handleDimKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitDimEdit();
+    }
+    if (e.key === "Escape") {
+      editingDim = null;
+    }
+  }
+
+  function commitDimEdit() {
+    if (!editingDim) return;
+    const newVal = parseFloat(editInputEl?.value);
+    if (!newVal || newVal <= 0) { editingDim = null; return; }
+
+    const dim = geometry.dimensions[editingDim.index];
+    const k = get(currentKozijn);
+    if (!k) { editingDim = null; return; }
+
+    const ow = k.frame.outerWidth;
+    const oh = k.frame.outerHeight;
+    const fw = k.frame.frameWidth;
+
+    // Determine what this dimension controls based on position
+    const dimOffset = 25;
+    const y1 = dim.y1;
+    const x1 = dim.x1;
+
+    if (dim.side === "bottom") {
+      // Level 1: overall width
+      if (Math.abs(y1 - (oh + dimOffset)) < 5) {
+        updateDimensions(newVal, oh);
+      }
+      // Level 2: dagmaat — compute outer from inner
+      else if (Math.abs(y1 - (oh + dimOffset * 2)) < 5) {
+        updateDimensions(newVal + 2 * fw, oh);
+      }
+      // Level 3: column sizes or frame width
+      else if (Math.abs(y1 - (oh + dimOffset * 3)) < 5) {
+        // Check if it's a frame width or column size
+        if (Math.abs(dim.x1) < 1 || Math.abs(dim.x2 - ow) < 1) {
+          // Frame width — skip (profile-dependent)
+        } else {
+          // Column size — find which column
+          const cols = [...k.grid.columns];
+          let cx = fw;
+          for (let i = 0; i < cols.length; i++) {
+            if (Math.abs(dim.x1 - cx) < 2) {
+              const diff = newVal - cols[i].size;
+              cols[i] = { ...cols[i], size: newVal };
+              // Adjust adjacent column to compensate
+              if (i + 1 < cols.length) {
+                cols[i + 1] = { ...cols[i + 1], size: Math.max(100, cols[i + 1].size - diff) };
+              }
+              updateGridSizes(cols.map(c => c.size), k.grid.rows.map(r => r.size));
+              break;
+            }
+            cx += cols[i].size;
+            if (cols[i].dividerProfile || i < cols.length - 1) cx += fw;
+          }
+        }
+      }
+    } else if (dim.side === "right") {
+      // Level 1: overall height
+      if (Math.abs(x1 - (ow + dimOffset)) < 5) {
+        updateDimensions(ow, newVal);
+      }
+      // Level 2: dagmaat hoogte
+      else if (Math.abs(x1 - (ow + dimOffset * 2)) < 5) {
+        updateDimensions(ow, newVal + 2 * fw);
+      }
+      // Level 3: row sizes
+      else if (Math.abs(x1 - (ow + dimOffset * 3)) < 5) {
+        const rows = [...k.grid.rows];
+        let cy = fw;
+        for (let i = 0; i < rows.length; i++) {
+          if (Math.abs(dim.y1 - cy) < 2) {
+            const diff = newVal - rows[i].size;
+            rows[i] = { ...rows[i], size: newVal };
+            if (i + 1 < rows.length) {
+              rows[i + 1] = { ...rows[i + 1], size: Math.max(100, rows[i + 1].size - diff) };
+            }
+            updateGridSizes(k.grid.columns.map(c => c.size), rows.map(r => r.size));
+            break;
+          }
+          cy += rows[i].size;
+          if (i < rows.length - 1) cy += fw;
+        }
+      }
+    }
+
+    editingDim = null;
+  }
 
   const FRAME_MEMBER_NAMES = ["frame_top", "frame_bottom", "frame_left", "frame_right"];
 
@@ -91,6 +209,26 @@
       tabindex="0"
     />
   {/each}
+
+  <!-- Trapezoid outline for trapezoid frame shapes -->
+  {#if geometry.trapezoidOuter && geometry.trapezoidOuter.length >= 3}
+    <polygon
+      points={geometry.trapezoidOuter.map(p => `${p[0]},${p[1]}`).join(' ')}
+      fill="none"
+      stroke="var(--editor-frame)"
+      stroke-width={kozijn.frame.frameWidth}
+      stroke-linejoin="miter"
+    />
+    {#if geometry.trapezoidInner && geometry.trapezoidInner.length >= 3}
+      <polygon
+        points={geometry.trapezoidInner.map(p => `${p[0]},${p[1]}`).join(' ')}
+        fill="none"
+        stroke="var(--editor-frame)"
+        stroke-width={1}
+        opacity="0.5"
+      />
+    {/if}
+  {/if}
 
   <!-- Arcs for arched/round kozijnen -->
   {#each (geometry.arcs || []) as arc}
@@ -189,7 +327,7 @@
   {/each}
 
   <!-- Dimension lines — rendered in model-space with inverse-zoom for constant screen size -->
-  {#each geometry.dimensions as dim}
+  {#each geometry.dimensions as dim, dimIdx}
     {@const fontSize = 12 / zoom}
     {@const sw = 1 / zoom}
     {@const tick = 6 / zoom}
@@ -197,6 +335,7 @@
     {@const isH = dim.side === "bottom" || dim.side === "top"}
     {@const midX = (dim.x1 + dim.x2) / 2}
     {@const midY = (dim.y1 + dim.y2) / 2}
+    {@const dimVal = Number(dim.label) > 0 ? Math.round(Number(dim.label)) : dim.label}
 
     <!-- Dimension line -->
     <line x1={dim.x1} y1={dim.y1} x2={dim.x2} y2={dim.y2}
@@ -212,35 +351,76 @@
     {/if}
 
     <!-- Label background for readability -->
-    {@const labelW = dim.label.length * fontSize * 0.6 + bgPad * 2}
+    {@const labelW = String(dimVal).length * fontSize * 0.6 + bgPad * 2}
     {@const labelH = fontSize + bgPad * 2}
-    {#if isH}
-      <rect
-        x={midX - labelW / 2} y={midY - labelH - bgPad}
-        width={labelW} height={labelH}
-        fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
-      />
-    {:else}
-      <rect
-        x={midX + bgPad} y={midY - labelH / 2}
-        width={labelW} height={labelH}
-        fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
-      />
-    {/if}
 
-    <!-- Label text -->
-    <text
-      x={isH ? midX : midX + bgPad + labelW / 2}
-      y={isH ? midY - bgPad - fontSize * 0.15 : midY}
-      text-anchor="middle"
-      dominant-baseline={isH ? "auto" : "central"}
-      fill="var(--editor-dimension)"
-      font-size={fontSize}
-      font-family="var(--font-body)"
-      font-weight="600"
-    >
-      {Number(dim.label) > 0 ? Math.round(Number(dim.label)) : dim.label}
-    </text>
+    {#if editingDim && editingDim.index === dimIdx}
+      <!-- Inline edit input -->
+      <foreignObject
+        x={isH ? midX - 30 / zoom : midX + bgPad}
+        y={isH ? midY - labelH - bgPad : midY - labelH / 2}
+        width={60 / zoom}
+        height={labelH * 1.2}
+      >
+        <!-- svelte-ignore a11y_autofocus -->
+        <input
+          bind:this={editInputEl}
+          type="number"
+          value={editingDim.value}
+          onkeydown={handleDimKeyDown}
+          onblur={() => { editingDim = null; }}
+          style="
+            width: 100%;
+            height: 100%;
+            background: var(--amber, #D97706);
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            text-align: center;
+            font-size: {Math.min(14, fontSize * zoom)}px;
+            font-weight: 700;
+            font-family: var(--font-body);
+            outline: none;
+            padding: 0 2px;
+          "
+        />
+      </foreignObject>
+    {:else}
+      {#if isH}
+        <rect
+          x={midX - labelW / 2} y={midY - labelH - bgPad}
+          width={labelW} height={labelH}
+          fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
+          style="cursor: pointer"
+          onclick={(e) => handleDimClick(dimIdx, e)}
+        />
+      {:else}
+        <rect
+          x={midX + bgPad} y={midY - labelH / 2}
+          width={labelW} height={labelH}
+          fill="var(--editor-bg, #1a1a2e)" rx={2 / zoom} opacity="0.85"
+          style="cursor: pointer"
+          onclick={(e) => handleDimClick(dimIdx, e)}
+        />
+      {/if}
+
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <text
+        x={isH ? midX : midX + bgPad + labelW / 2}
+        y={isH ? midY - bgPad - fontSize * 0.15 : midY}
+        text-anchor="middle"
+        dominant-baseline={isH ? "auto" : "central"}
+        fill="var(--editor-dimension)"
+        font-size={fontSize}
+        font-family="var(--font-body)"
+        font-weight="600"
+        style="cursor: pointer"
+        onclick={(e) => handleDimClick(dimIdx, e)}
+      >
+        {dimVal}
+      </text>
+    {/if}
   {/each}
 </g>
 

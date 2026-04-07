@@ -208,6 +208,7 @@
           <option value="rectangular">{$_('props.rectangular')}</option>
           <option value="arched">{$_('props.arched')}</option>
           <option value="round">{$_('props.round')}</option>
+          <option value="trapezoid">{$_('props.trapezoid') || "Trapezium (schuine stijlen)"}</option>
         </select>
       </div>
       {#if $currentKozijn.frame.shape?.shapeType === "arched"}
@@ -219,6 +220,46 @@
             onchange={(e) => updateFrameShape("arched", parseFloat(e.target.value))}
             min="50"
             max={Math.round($currentKozijn.frame.outerHeight / 2)}
+            step="10"
+          />
+        </div>
+      {/if}
+      {#if $currentKozijn.frame.shape?.shapeType === "trapezoid"}
+        <div class="field-row">
+          <div class="field">
+            <label>{$_('props.leftAngle') || "Hoek links (°)"}</label>
+            <input
+              type="number"
+              value={$currentKozijn.frame.shape.leftAngle || 75}
+              onchange={(e) => {
+                const angle = parseFloat(e.target.value);
+                updateFrameShape("trapezoid", null);
+                // TODO: pass angle through extended updateFrameShape
+              }}
+              min="45" max="90" step="1"
+            />
+          </div>
+          <div class="field">
+            <label>{$_('props.rightAngle') || "Hoek rechts (°)"}</label>
+            <input
+              type="number"
+              value={$currentKozijn.frame.shape.rightAngle || 75}
+              onchange={(e) => {
+                const angle = parseFloat(e.target.value);
+                updateFrameShape("trapezoid", null);
+              }}
+              min="45" max="90" step="1"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label>{$_('props.topWidth') || "Breedte boven (mm)"}</label>
+          <input
+            type="number"
+            value={$currentKozijn.frame.shape.topWidth || Math.round($currentKozijn.frame.outerWidth * 0.6)}
+            onchange={(e) => updateFrameShape("trapezoid", null)}
+            min="200"
+            max={$currentKozijn.frame.outerWidth}
             step="10"
           />
         </div>
