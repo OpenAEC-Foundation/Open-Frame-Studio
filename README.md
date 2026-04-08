@@ -12,15 +12,15 @@ Built by the [OpenAEC Foundation](https://github.com/OpenAEC-Foundation) — acc
 
 ## What is Open Frame Studio?
 
-Open Frame Studio is a desktop application for designing, documenting, and exporting kozijnen (window and door frames). It fills the gap between expensive commercial tools like DeltaPi and MatrixKozijn and manual CAD workflows.
+Open Frame Studio is a desktop application for designing, documenting, and exporting kozijnen (window and door frames). A free, professional-grade alternative to commercial kozijnsoftware.
 
 ### Key Features
 
 - **2D Kozijn Editor** — Interactive SVG editor with grid subdivision, drag handles, dimension lines, and cell-type assignment
-- **Interactive Profile Editor** — Visual point-by-point cross-section editing with drag handles, edge splitting, mirroring, snap-to-grid, and undo/redo (DeltaPi-level functionality)
+- **Interactive Profile Editor** — Visual point-by-point cross-section editing with drag handles, edge splitting, mirroring, snap-to-grid, and undo/redo
 - **AI Configurator Assistant** — Natural language kozijn design via OpenAI-compatible API (works with OpenAI, Ollama, or any compatible endpoint). Type "Maak een draaikiep 900x1400" and it creates the kozijn.
 - **Template Library** — Pre-built templates: draaikiepraam, dubbel draaikiepraam, schuifpui, voordeur, melkmeisje, melkmeisje met bovenlicht
-- **80+ Profielen** — Verified profile library from 17+ Dutch and European manufacturers (HEBO, Goemaat, WEBO, Weekamp, KVT, Reynaers, Schüco, Gealan, VEKA, Kömmerling, Aluplast, Deceuninck, and more)
+- **80+ Profielen** — Uitgebreide profielbibliotheek voor hout, aluminium, PVC en hout-aluminium met realistische sponning-doorsnedes
 - **3D Viewer** — Three.js-based 3D preview with frame extrusion and transparent glass panels
 - **IFC Export** — Generate IFC files with ILS Houten Kozijnen v2.0 property sets for BIM workflows
 - **DXF Export** — Workshop-ready DXF drawings with dimension lines
@@ -30,14 +30,14 @@ Open Frame Studio is a desktop application for designing, documenting, and expor
 - **Undo/Redo** — Full snapshot-based undo/redo with Ctrl+Z / Ctrl+Y
 - **Dark & Light Theme** — OpenAEC Design System with Amber accent (#D97706)
 
-### Materials Supported
+### Materialen
 
-| Category | Manufacturers |
+| Categorie | Typen |
 |---|---|
-| **Hout** | KVT Standaard, ABC Profiel, Raamhout NL, WEBO, HEBO, Goemaat, Weekamp, Raamwerk, Meranti, Accoya, Hardhout FSC, Naaldhout |
-| **Aluminium** | Reynaers, Schüco, Generic |
-| **Kunststof (PVC)** | Gealan, VEKA, Kömmerling, Aluplast, Deceuninck, Generic |
-| **Hout-Aluminium** | Hout-Aluminium combinaties |
+| **Hout** | KVT standaard profielen (54/67/78/90mm series), meranti, accoya, vuren, eiken, hardhout FSC, naaldhout |
+| **Aluminium** | Standaard aluminium profielen |
+| **Kunststof (PVC)** | Standaard PVC profielen |
+| **Hout-Aluminium** | Combinatieprofielen |
 
 ---
 
@@ -53,7 +53,7 @@ Open Frame Studio is a desktop application for designing, documenting, and expor
 - **EN 12519 opening symbolen** — draai (driehoek basis=scharnier, punt=kruk), kiep, draai-kiep, schuif
 - **Scharnier- en kruk-indicatoren** — kleine cirkels aan scharnierkant, T-lijn aan krukkant
 
-### Maatvoering (NEN 3576 / GA Kozijn stijl)
+### Maatvoering (NEN 3576)
 - **3-niveau systeem** — Niveau 1: houtdiktes + vakmaten (complete maatketen), Niveau 2: dagmaat, Niveau 3: buitenwerkse maat
 - **Rechts-labels 90° geroteerd** — geen overlap meer bij verticale dimensies
 - **Invoerveld vergroot** — 100/zoom breed, font schaalt mee met zoom
@@ -163,9 +163,9 @@ Open-Frame-Studio/
 │   ├── ofs_dxf/            # DXF generation (ezdxf)
 │   └── ofs_pdf/            # PDF kozijnstaat + werkplaatstekening
 └── profiles/               # Profile library (JSON)
-    ├── wood/               # 12 manufacturers
-    ├── aluminum/           # 3 manufacturers
-    ├── pvc/                # 6 manufacturers
+    ├── wood/               # Houten profielen
+    ├── aluminum/           # Aluminium profielen
+    ├── pvc/                # PVC profielen
     └── wood-aluminum/      # Combinatieprofielen
 ```
 
