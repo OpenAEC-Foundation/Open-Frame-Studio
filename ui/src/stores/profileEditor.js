@@ -38,7 +38,7 @@ function createProfileEditorStore() {
     update,
 
     loadProfile(profile) {
-      const verts = (profile.crossSection || []).map(([x, y]) => ({ x, y }));
+      const verts = (profile.crossSection || []).map(([x, y]) => ({ x, y, radius: 0 }));
       set({
         profile: { ...profile },
         vertices: verts,
@@ -61,14 +61,14 @@ function createProfileEditorStore() {
 
     newProfile() {
       const defaultVerts = [
-        { x: 0, y: 0 },
-        { x: 67, y: 0 },
-        { x: 67, y: 97 },
-        { x: 55, y: 97 },
-        { x: 55, y: 114 },
-        { x: 12, y: 114 },
-        { x: 12, y: 97 },
-        { x: 0, y: 97 },
+        { x: 0, y: 0, radius: 0 },
+        { x: 67, y: 0, radius: 0 },
+        { x: 67, y: 97, radius: 0 },
+        { x: 55, y: 97, radius: 0 },
+        { x: 55, y: 114, radius: 0 },
+        { x: 12, y: 114, radius: 0 },
+        { x: 12, y: 97, radius: 0 },
+        { x: 0, y: 97, radius: 0 },
       ];
       set({
         profile: {
@@ -125,7 +125,7 @@ function createProfileEditorStore() {
       pushUndo();
       update((s) => {
         const verts = [...s.vertices];
-        verts.splice(afterIndex + 1, 0, { x, y });
+        verts.splice(afterIndex + 1, 0, { x, y, radius: 0 });
         return {
           ...s,
           vertices: verts,
@@ -147,6 +147,17 @@ function createProfileEditorStore() {
           selectedVertex: -1,
           isDirty: true,
         };
+      });
+    },
+
+    setVertexRadius(index, radius) {
+      pushUndo();
+      update((s) => {
+        const verts = [...s.vertices];
+        if (verts[index]) {
+          verts[index] = { ...verts[index], radius: Math.max(0, radius) };
+        }
+        return { ...s, vertices: verts, isDirty: true };
       });
     },
 

@@ -203,58 +203,12 @@
 </script>
 
 <g>
-  <!-- Frame members (outer border) -->
-  {#each geometry.frameRects as rect, i}
-    {@const memberType = FRAME_MEMBER_NAMES[i]}
-    {@const isSelected = $selectedMember?.type === memberType}
+  <!-- Frame members background (drawn first, behind cells) -->
+  {#each geometry.frameRects as rect}
     <rect
       x={rect.x} y={rect.y}
       width={rect.width} height={rect.height}
       fill="var(--editor-frame)"
-      stroke={isSelected ? "var(--editor-selected)" : "none"}
-      stroke-width={isSelected ? 3 : 0}
-      class="member"
-      onclick={(e) => handleMemberClick(memberType, i, e)}
-      role="button"
-      tabindex="0"
-    />
-  {/each}
-
-  <!-- Trapezoid outline for trapezoid frame shapes -->
-  {#if geometry.trapezoidOuter && geometry.trapezoidOuter.length >= 3}
-    <polygon
-      points={geometry.trapezoidOuter.map(p => `${p[0]},${p[1]}`).join(' ')}
-      fill="none"
-      stroke="var(--editor-frame)"
-      stroke-width={kozijn.frame.frameWidth}
-      stroke-linejoin="miter"
-    />
-    {#if geometry.trapezoidInner && geometry.trapezoidInner.length >= 3}
-      <polygon
-        points={geometry.trapezoidInner.map(p => `${p[0]},${p[1]}`).join(' ')}
-        fill="none"
-        stroke="var(--editor-frame)"
-        stroke-width={1}
-        opacity="0.5"
-      />
-    {/if}
-  {/if}
-
-  <!-- Arcs for arched/round kozijnen -->
-  {#each (geometry.arcs || []) as arc}
-    {@const r = arc.radius}
-    {@const startRad = arc.startAngle * Math.PI / 180}
-    {@const endRad = arc.endAngle * Math.PI / 180}
-    {@const x1 = arc.cx + r * Math.cos(startRad)}
-    {@const y1 = arc.cy - r * Math.sin(startRad)}
-    {@const x2 = arc.cx + r * Math.cos(endRad)}
-    {@const y2 = arc.cy - r * Math.sin(endRad)}
-    {@const largeArc = (arc.endAngle - arc.startAngle) > 180 ? 1 : 0}
-    <path
-      d="M {x1} {y1} A {r} {r} 0 {largeArc} 0 {x2} {y2}"
-      fill="none"
-      stroke="var(--editor-frame)"
-      stroke-width={arc.strokeWidth}
     />
   {/each}
 
@@ -305,6 +259,52 @@
     </text>
   {/each}
 
+  <!-- Frame members (clickable overlay, drawn ON TOP of cells so onderdorpel is visible) -->
+  {#each geometry.frameRects as rect, i}
+    {@const memberType = FRAME_MEMBER_NAMES[i]}
+    {@const isSelected = $selectedMember?.type === memberType}
+    <rect
+      x={rect.x} y={rect.y}
+      width={rect.width} height={rect.height}
+      fill="var(--editor-frame)"
+      stroke={isSelected ? "var(--editor-selected)" : "none"}
+      stroke-width={isSelected ? 3 : 0}
+      class="member"
+      onclick={(e) => handleMemberClick(memberType, i, e)}
+      role="button"
+      tabindex="0"
+    />
+  {/each}
+
+  <!-- Trapezoid outline -->
+  {#if geometry.trapezoidOuter && geometry.trapezoidOuter.length >= 3}
+    <polygon
+      points={geometry.trapezoidOuter.map(p => `${p[0]},${p[1]}`).join(' ')}
+      fill="none"
+      stroke="var(--editor-frame)"
+      stroke-width={kozijn.frame.frameWidth}
+      stroke-linejoin="miter"
+    />
+  {/if}
+
+  <!-- Arcs for arched/round kozijnen -->
+  {#each (geometry.arcs || []) as arc}
+    {@const r = arc.radius}
+    {@const startRad = arc.startAngle * Math.PI / 180}
+    {@const endRad = arc.endAngle * Math.PI / 180}
+    {@const x1 = arc.cx + r * Math.cos(startRad)}
+    {@const y1 = arc.cy - r * Math.sin(startRad)}
+    {@const x2 = arc.cx + r * Math.cos(endRad)}
+    {@const y2 = arc.cy - r * Math.sin(endRad)}
+    {@const largeArc = (arc.endAngle - arc.startAngle) > 180 ? 1 : 0}
+    <path
+      d="M {x1} {y1} A {r} {r} 0 {largeArc} 0 {x2} {y2}"
+      fill="none"
+      stroke="var(--editor-frame)"
+      stroke-width={arc.strokeWidth}
+    />
+  {/each}
+
   <!-- Vertical dividers -->
   {#each geometry.vDividers as rect, i}
     {@const isSelected = $selectedMember?.type === "divider_v" && $selectedMember?.index === i}
@@ -335,6 +335,47 @@
       role="button"
       tabindex="0"
     />
+  {/each}
+
+  <!-- Profile codes on frame members (GA Kozijn style - green text) -->
+  {#each geometry.frameRects as rect, i}
+    {@const memberName = FRAME_MEMBER_NAMES[i]}
+    {@const isVertical = memberName === "frame_left" || memberName === "frame_right"}
+    {@const profileLabel = `${Math.round(kozijn.frame.frameWidth)}×${Math.round(kozijn.frame.frameDepth)}`}
+    {@const labelFs = 10 / zoom}
+    <text
+      x={isVertical ? rect.x + rect.width / 2 : rect.x + rect.width / 2}
+      y={isVertical ? rect.y + rect.height / 2 : rect.y + rect.height / 2}
+      text-anchor="middle"
+      dominant-baseline="central"
+      fill="#16A34A"
+      font-size={labelFs}
+      font-family="var(--font-body)"
+      font-weight="600"
+      opacity="0.7"
+      pointer-events="none"
+      transform={isVertical ? `rotate(-90, ${rect.x + rect.width / 2}, ${rect.y + rect.height / 2})` : ""}
+    >
+      {profileLabel}
+    </text>
+  {/each}
+
+  <!-- Sash frame (raamhout) for operable cells -->
+  {#each geometry.cellRects as cellRect}
+    {@const cell = kozijn.cells?.[cellRect.cellIndex]}
+    {#if cell && cell.sashWidth && cell.sashWidth > 0 && ["turn_tilt", "turn", "tilt", "sliding", "door"].includes(cell.panelType)}
+      {@const sw = cell.sashWidth}
+      {@const r = cellRect.rect}
+      <rect
+        x={r.x + sw * 0.3} y={r.y + sw * 0.3}
+        width={Math.max(1, r.width - sw * 0.6)} height={Math.max(1, r.height - sw * 0.6)}
+        fill="none"
+        stroke="var(--amber)"
+        stroke-width={sw * 0.15}
+        opacity="0.5"
+        pointer-events="none"
+      />
+    {/if}
   {/each}
 
   <!-- Dimension lines — rendered in model-space with inverse-zoom for constant screen size -->

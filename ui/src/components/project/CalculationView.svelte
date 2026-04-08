@@ -202,6 +202,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 12px;
   }
@@ -218,6 +219,9 @@
     letter-spacing: 0.04em;
     color: var(--text-muted);
     border-bottom: 2px solid var(--border-color, #e5e7eb);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   tbody tr {

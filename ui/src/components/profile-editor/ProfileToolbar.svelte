@@ -1,6 +1,6 @@
 <script>
   import { _ } from "svelte-i18n";
-  import { profileEditor, editorTool, editorSnap, editorSelectedVertex, editorIsDirty } from "../../stores/profileEditor.js";
+  import { profileEditor, editorTool, editorSnap, editorSelectedVertex, editorVertices, editorIsDirty } from "../../stores/profileEditor.js";
 
   function handleKeyDown(e) {
     if (e.key === "Delete" || e.key === "Backspace") {
@@ -111,6 +111,22 @@
     </button>
   </div>
 
+  {#if $editorSelectedVertex >= 0}
+    <div class="separator"></div>
+    <div class="tool-group vertex-info">
+      <span class="vertex-label">R:</span>
+      <input
+        type="number"
+        class="radius-input"
+        value={$editorVertices[$editorSelectedVertex]?.radius || 0}
+        min="0" max="30" step="0.5"
+        oninput={(e) => profileEditor.setVertexRadius($editorSelectedVertex, parseFloat(e.target.value) || 0)}
+        title="Hoekradius (mm)"
+      />
+      <span class="vertex-label">mm</span>
+    </div>
+  {/if}
+
   <div class="spacer"></div>
 
   <div class="hint">
@@ -183,5 +199,32 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 400px;
+  }
+
+  .vertex-info {
+    align-items: center;
+    gap: 4px;
+  }
+
+  .vertex-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .radius-input {
+    width: 50px;
+    padding: 2px 4px;
+    font-size: 11px;
+    background: var(--bg-surface-alt);
+    border: var(--border-default);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    text-align: right;
+  }
+
+  .radius-input:focus {
+    outline: none;
+    border-color: var(--amber);
   }
 </style>

@@ -266,6 +266,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 12px;
   }
@@ -282,6 +283,14 @@
     letter-spacing: 0.04em;
     color: var(--text-muted);
     border-bottom: 2px solid var(--border-color, #e5e7eb);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  thead th:last-child {
+    width: 60px;
+    text-align: right;
   }
 
   tbody tr {
@@ -295,9 +304,12 @@
   td {
     padding: var(--sp-2) var(--sp-3);
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  td.num {
+  td.num, th.num {
     text-align: right;
     font-variant-numeric: tabular-nums;
   }

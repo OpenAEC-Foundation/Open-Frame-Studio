@@ -56,7 +56,10 @@
 
   async function loadThreeJS() {
     try {
-      THREE = await import("three");
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Three.js load timeout (10s)")), 10000)
+      );
+      THREE = await Promise.race([import("three"), timeout]);
       loading = false;
       return true;
     } catch (e) {

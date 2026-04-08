@@ -134,16 +134,46 @@
     return getGridLines();
   });
 
-  // Polygon path string
-  let polyPoints = $derived(
-    $editorVertices.map((v) => `${v.x},${v.y}`).join(" ")
-  );
+  // Polygon path string — supports rounded corners via vertex radius
+  let profilePathD = $derived.by(() => {
+    const verts = $editorVertices;
+    if (verts.length < 3) return "";
 
-  // Sponning overlay
-  let sponningStore = $derived.by(() => {
-    let s;
-    profileEditor.subscribe(v => s = v)();
-    return s.sponning;
+    const hasRadius = verts.some(v => (v.radius || 0) > 0);
+    if (!hasRadius) {
+      // Simple polygon (no radii)
+      return "M " + verts.map(v => `${v.x} ${v.y}`).join(" L ") + " Z";
+    }
+
+    // Build path with arc segments for rounded corners
+    let d = "";
+    for (let i = 0; i < verts.length; i++) {
+      const prev = verts[(i - 1 + verts.length) % verts.length];
+      const curr = verts[i];
+      const next = verts[(i + 1) % verts.length];
+      const r = curr.radius || 0;
+
+      if (r <= 0) {
+        d += (i === 0 ? "M " : " L ") + `${curr.x} ${curr.y}`;
+      } else {
+        // Calculate tangent points
+        const dx1 = prev.x - curr.x, dy1 = prev.y - curr.y;
+        const dx2 = next.x - curr.x, dy2 = next.y - curr.y;
+        const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+        const maxR = Math.min(r, len1 / 2, len2 / 2);
+
+        const t1x = curr.x + (dx1 / len1) * maxR;
+        const t1y = curr.y + (dy1 / len1) * maxR;
+        const t2x = curr.x + (dx2 / len2) * maxR;
+        const t2y = curr.y + (dy2 / len2) * maxR;
+
+        d += (i === 0 ? "M " : " L ") + `${t1x} ${t1y}`;
+        d += ` Q ${curr.x} ${curr.y} ${t2x} ${t2y}`;
+      }
+    }
+    d += " Z";
+    return d;
   });
 
   // Dimension labels
@@ -194,8 +224,8 @@
 
       <!-- Profile polygon -->
       {#if $editorVertices.length >= 3}
-        <polygon
-          points={polyPoints}
+        <path
+          d={profilePathD}
           fill="var(--bg-surface-alt, #2a2a32)"
           fill-opacity="0.6"
           stroke="var(--amber, #D97706)"
@@ -203,86 +233,7 @@
           stroke-linejoin="miter"
         />
 
-        <!-- Sponning zone indicator -->
-        {@const b = $editorBounds}
-        {#if sponningStore.position === "buiten"}
-          <rect
-            x={sponningStore.width}
-            y={b.maxY - sponningStore.depth}
-            width={b.width - sponningStore.width * 2}
-            height={sponningStore.depth}
-            fill="var(--info, #2563EB)" fill-opacity="0.12"
-            stroke="var(--info, #2563EB)" stroke-width={1 / zoom}
-            stroke-dasharray="{3 / zoom} {2 / zoom}"
-          />
-          <text x={b.width / 2} y={b.maxY - sponningStore.depth / 2}
-            text-anchor="middle" dominant-baseline="middle"
-            fill="var(--info, #2563EB)" font-size={8 / zoom} opacity="0.6">
-            sponning {sponningStore.width}×{sponningStore.depth}
-          </text>
-        {:else if sponningStore.position === "binnen"}
-          <rect
-            x={sponningStore.width}
-            y={b.minY}
-            width={b.width - sponningStore.width * 2}
-            height={sponningStore.depth}
-            fill="var(--success, #16A34A)" fill-opacity="0.12"
-            stroke="var(--success, #16A34A)" stroke-width={1 / zoom}
-            stroke-dasharray="{3 / zoom} {2 / zoom}"
-          />
-          <text x={b.width / 2} y={b.minY + sponningStore.depth / 2}
-            text-anchor="middle" dominant-baseline="middle"
-            fill="var(--success, #16A34A)" font-size={8 / zoom} opacity="0.6">
-            sponning {sponningStore.width}×{sponningStore.depth}
-          </text>
-        {:else if sponningStore.position === "midden"}
-          {@const mid = (b.height - sponningStore.depth) / 2}
-          <rect
-            x={sponningStore.width}
-            y={b.minY + mid}
-            width={b.width - sponningStore.width * 2}
-            height={sponningStore.depth}
-            fill="var(--warning, #F59E0B)" fill-opacity="0.12"
-            stroke="var(--warning, #F59E0B)" stroke-width={1 / zoom}
-            stroke-dasharray="{3 / zoom} {2 / zoom}"
-          />
-          <text x={b.width / 2} y={b.minY + mid + sponningStore.depth / 2}
-            text-anchor="middle" dominant-baseline="middle"
-            fill="var(--warning, #F59E0B)" font-size={8 / zoom} opacity="0.6">
-            sponning {sponningStore.width}×{sponningStore.depth}
-          </text>
-        {:else if sponningStore.position === "dubbel"}
-          <!-- Voorsponning (boven) -->
-          <rect
-            x={sponningStore.width}
-            y={b.minY}
-            width={b.width - sponningStore.width * 2}
-            height={sponningStore.depth}
-            fill="var(--info, #2563EB)" fill-opacity="0.12"
-            stroke="var(--info, #2563EB)" stroke-width={1 / zoom}
-            stroke-dasharray="{3 / zoom} {2 / zoom}"
-          />
-          <text x={b.width / 2} y={b.minY + sponningStore.depth / 2}
-            text-anchor="middle" dominant-baseline="middle"
-            fill="var(--info, #2563EB)" font-size={7 / zoom} opacity="0.6">
-            voorsponning
-          </text>
-          <!-- Achtersponning (onder) -->
-          <rect
-            x={sponningStore.width}
-            y={b.maxY - sponningStore.depth}
-            width={b.width - sponningStore.width * 2}
-            height={sponningStore.depth}
-            fill="var(--success, #16A34A)" fill-opacity="0.12"
-            stroke="var(--success, #16A34A)" stroke-width={1 / zoom}
-            stroke-dasharray="{3 / zoom} {2 / zoom}"
-          />
-          <text x={b.width / 2} y={b.maxY - sponningStore.depth / 2}
-            text-anchor="middle" dominant-baseline="middle"
-            fill="var(--success, #16A34A)" font-size={7 / zoom} opacity="0.6">
-            achtersponning
-          </text>
-        {/if}
+        <!-- Sponningzone overlay verwijderd — profielvorm toont de inkeping al -->
       {/if}
 
       <!-- Dimension labels -->
