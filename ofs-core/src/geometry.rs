@@ -113,19 +113,38 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
 
     // Frame members — adjust for arched/special shapes
     let is_arched = kozijn.frame.shape.shape_type == ShapeType::Arched
-        || kozijn.frame.shape.shape_type == ShapeType::Round;
-    let top_rect_height = if is_arched { 0.0 } else { fw };
+        || kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid;
+    let is_round = kozijn.frame.shape.shape_type == ShapeType::Round;
+    let top_rect_height = if is_arched || is_round { 0.0 } else { fw };
 
-    let frame_rects = vec![
-        // Top (hidden for arched — arc replaces it)
-        Rect2D { x: 0.0, y: 0.0, width: ow, height: top_rect_height },
-        // Bottom (sill)
-        Rect2D { x: 0.0, y: oh - fw, width: ow, height: fw },
-        // Left (full height for arched, starts at 0)
-        Rect2D { x: 0.0, y: top_rect_height, width: fw, height: oh - top_rect_height - fw },
-        // Right
-        Rect2D { x: ow - fw, y: top_rect_height, width: fw, height: oh - top_rect_height - fw },
-    ];
+    // For arched frames, stiles start at the arch spring line (not y=0)
+    let stile_top_y = if is_arched {
+        let arch_h = kozijn.frame.shape.arch_height.unwrap_or(ow / 4.0);
+        arch_h // stiles begin where the arch springs from
+    } else {
+        top_rect_height
+    };
+
+    // For round frames, all rectangular members are hidden (circle replaces everything)
+    let frame_rects = if is_round {
+        vec![
+            Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
+            Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
+            Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
+            Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
+        ]
+    } else {
+        vec![
+            // Top (hidden for arched — arc replaces it)
+            Rect2D { x: 0.0, y: 0.0, width: ow, height: top_rect_height },
+            // Bottom (sill)
+            Rect2D { x: 0.0, y: oh - fw, width: ow, height: fw },
+            // Left stile (starts at arch spring for arched frames)
+            Rect2D { x: 0.0, y: stile_top_y, width: fw, height: oh - stile_top_y - fw },
+            // Right stile
+            Rect2D { x: ow - fw, y: stile_top_y, width: fw, height: oh - stile_top_y - fw },
+        ]
+    };
 
     // Calculate column positions (x coordinates of cell starts)
     let mut col_positions = Vec::new();
@@ -139,8 +158,9 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     }
 
     // Calculate row positions (y coordinates of cell starts)
+    // For arched frames, first row starts at arch spring line
     let mut row_positions = Vec::new();
-    let mut y = fw;
+    let mut y = if is_arched { stile_top_y } else { fw };
     for (i, row) in kozijn.grid.rows.iter().enumerate() {
         row_positions.push(y);
         y += row.size;
@@ -202,75 +222,116 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         }
     }
 
-    // ── Dimension lines ──
-    // Bottom Level 1: vakmaten (column widths only, no stijl widths for simple kozijnen)
-    // Bottom Level 2: buitenmaat totaal
-    // Right Level 1: vakmaten (row heights)
-    // Right Level 2: buitenmaat totaal
-    // Only show stijl/dorpel widths when there are multiple cols/rows
-    let dim_gap = 18.0; // gap between dimension levels
-    let dim_start = 15.0; // first level offset from frame
+    // ── Dimension lines (NEN 3576 / GA Kozijn style) ──
+    // Level 1 (closest): houtdiktes + vakmaten (stijl, kolommen, stijl)
+    // Level 2: dagmaat (inner opening)
+    // Level 3 (outermost): buitenwerkse maat (overall)
+    let dim_gap = 35.0;
+    let dim_start = 20.0;
     let mut dimensions = Vec::new();
     let inner_w = ow - 2.0 * fw;
     let inner_h = oh - 2.0 * fw;
+    let divider_width = fw;
     let num_cols = kozijn.grid.columns.len();
     let num_rows = kozijn.grid.rows.len();
-    let has_multi_cols = num_cols > 1;
-    let has_multi_rows = num_rows > 1;
 
-    // ── Bottom Level 1: vakmaten ──
+    // ── Bottom Level 1: houtdiktes + vakmaten (complete dimension chain) ──
     let bot_y1 = oh + dim_start;
-    if has_multi_cols {
-        // Show each column width separately
-        for (i, col) in kozijn.grid.columns.iter().enumerate() {
-            let cx = col_positions[i];
+    // Left stijl
+    dimensions.push(DimensionLine {
+        x1: 0.0, y1: bot_y1, x2: fw, y2: bot_y1,
+        label: format!("{:.0}", fw),
+        side: DimensionSide::Bottom,
+    });
+    // Column widths (vakmaten)
+    for (i, col) in kozijn.grid.columns.iter().enumerate() {
+        let cx = col_positions[i];
+        dimensions.push(DimensionLine {
+            x1: cx, y1: bot_y1, x2: cx + col.size, y2: bot_y1,
+            label: format!("{:.0}", col.size),
+            side: DimensionSide::Bottom,
+        });
+        // Divider width (tussenstijl)
+        if i < num_cols - 1 {
+            let dx = cx + col.size;
             dimensions.push(DimensionLine {
-                x1: cx, y1: bot_y1, x2: cx + col.size, y2: bot_y1,
-                label: format!("{:.0}", col.size),
+                x1: dx, y1: bot_y1, x2: dx + divider_width, y2: bot_y1,
+                label: format!("{:.0}", divider_width),
                 side: DimensionSide::Bottom,
             });
         }
-    } else {
-        // Single column: show inner width (dagmaat)
-        dimensions.push(DimensionLine {
-            x1: fw, y1: bot_y1, x2: ow - fw, y2: bot_y1,
-            label: format!("{:.0}", inner_w),
-            side: DimensionSide::Bottom,
-        });
     }
+    // Right stijl
+    dimensions.push(DimensionLine {
+        x1: ow - fw, y1: bot_y1, x2: ow, y2: bot_y1,
+        label: format!("{:.0}", fw),
+        side: DimensionSide::Bottom,
+    });
 
-    // ── Bottom Level 2: buitenmaat totaal ──
+    // ── Bottom Level 2: dagmaat ──
     let bot_y2 = oh + dim_start + dim_gap;
     dimensions.push(DimensionLine {
-        x1: 0.0, y1: bot_y2, x2: ow, y2: bot_y2,
+        x1: fw, y1: bot_y2, x2: ow - fw, y2: bot_y2,
+        label: format!("{:.0}", inner_w),
+        side: DimensionSide::Bottom,
+    });
+
+    // ── Bottom Level 3: buitenwerkse maat ──
+    let bot_y3 = oh + dim_start + dim_gap * 2.0;
+    dimensions.push(DimensionLine {
+        x1: 0.0, y1: bot_y3, x2: ow, y2: bot_y3,
         label: format!("{:.0}", ow),
         side: DimensionSide::Bottom,
     });
 
-    // ── Right Level 1: vakmaten ──
+    // ── Right Level 1: houtdiktes + vakmaten ──
     let right_x1 = ow + dim_start;
-    if has_multi_rows {
-        for (i, row) in kozijn.grid.rows.iter().enumerate() {
-            let cy = row_positions[i];
-            dimensions.push(DimensionLine {
-                x1: right_x1, y1: cy, x2: right_x1, y2: cy + row.size,
-                label: format!("{:.0}", row.size),
-                side: DimensionSide::Right,
-            });
-        }
-    } else {
-        // Single row: show inner height (dagmaat)
+    // Bovendorpel
+    let top_h = if is_arched || is_round { 0.0 } else { fw };
+    if top_h > 0.0 {
         dimensions.push(DimensionLine {
-            x1: right_x1, y1: fw, x2: right_x1, y2: oh - fw,
-            label: format!("{:.0}", inner_h),
+            x1: right_x1, y1: 0.0, x2: right_x1, y2: top_h,
+            label: format!("{:.0}", top_h),
             side: DimensionSide::Right,
         });
     }
+    // Row heights (vakmaten)
+    for (i, row) in kozijn.grid.rows.iter().enumerate() {
+        let cy = row_positions[i];
+        dimensions.push(DimensionLine {
+            x1: right_x1, y1: cy, x2: right_x1, y2: cy + row.size,
+            label: format!("{:.0}", row.size),
+            side: DimensionSide::Right,
+        });
+        // Divider height (tussendorpel)
+        if i < num_rows - 1 {
+            let dy = cy + row.size;
+            dimensions.push(DimensionLine {
+                x1: right_x1, y1: dy, x2: right_x1, y2: dy + divider_width,
+                label: format!("{:.0}", divider_width),
+                side: DimensionSide::Right,
+            });
+        }
+    }
+    // Onderdorpel
+    dimensions.push(DimensionLine {
+        x1: right_x1, y1: oh - fw, x2: right_x1, y2: oh,
+        label: format!("{:.0}", fw),
+        side: DimensionSide::Right,
+    });
 
-    // ── Right Level 2: buitenmaat totaal ──
+    // ── Right Level 2: dagmaat ──
     let right_x2 = ow + dim_start + dim_gap;
     dimensions.push(DimensionLine {
-        x1: right_x2, y1: 0.0, x2: right_x2, y2: oh,
+        x1: right_x2, y1: fw, x2: right_x2, y2: oh - fw,
+        label: format!("{:.0}", inner_h),
+        side: DimensionSide::Right,
+    });
+
+    // ── Right Level 3: buitenwerkse maat ──
+    let right_x3 = ow + dim_start + dim_gap * 2.0;
+    dimensions.push(DimensionLine {
+        x1: right_x3, y1: 0.0, x2: right_x3, y2: oh,
         label: format!("{:.0}", oh),
         side: DimensionSide::Right,
     });
@@ -279,33 +340,38 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     let mut arcs = Vec::new();
     if kozijn.frame.shape.shape_type == ShapeType::Arched {
         let arch_height = kozijn.frame.shape.arch_height.unwrap_or(ow / 4.0);
-        // Segmental arch: center is below the arch line
+        // Segmental arch: peak at y=0 (top of frame)
         // For a segmental arch of width W and rise H:
         // radius = (W/2)^2 / (2*H) + H/2
+        // Center is at y = radius (below the peak in SVG Y-down coords)
         let half_w = ow / 2.0;
         let radius = (half_w * half_w) / (2.0 * arch_height) + arch_height / 2.0;
-        let center_y = oh - arch_height + radius; // center below the peak
+        let center_y = radius; // peak at y = center_y - radius = 0
 
-        // Outer arc
-        let start_angle = ((half_w / radius).asin()).to_degrees();
+        // Outer arc: springs at (0, arch_height) and (ow, arch_height)
+        // cos(angle) = half_w / radius at the spring points
+        let spring_angle = (half_w / radius).acos().to_degrees();
         arcs.push(Arc2D {
             cx: half_w,
             cy: center_y,
             radius,
-            start_angle: 180.0 - start_angle,
-            end_angle: start_angle,
+            start_angle: 180.0 - spring_angle,
+            end_angle: spring_angle,
             stroke_width: fw,
         });
 
-        // Inner arc (smaller radius)
+        // Inner arc (smaller radius, spans inner opening from x=fw to x=ow-fw)
         let inner_radius = radius - fw;
-        if inner_radius > 0.0 {
+        let inner_half_w = half_w - fw;
+        if inner_radius > 0.0 && inner_half_w > 0.0 {
+            let inner_ratio = (inner_half_w / inner_radius).min(1.0);
+            let inner_spring_angle = inner_ratio.acos().to_degrees();
             arcs.push(Arc2D {
                 cx: half_w,
                 cy: center_y,
                 radius: inner_radius,
-                start_angle: 180.0 - start_angle,
-                end_angle: start_angle,
+                start_angle: 180.0 - inner_spring_angle,
+                end_angle: inner_spring_angle,
                 stroke_width: 1.0, // thin line for inner edge
             });
         }
@@ -316,41 +382,63 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         let arch_height = kozijn.frame.shape.arch_height.unwrap_or(ow / 4.0);
         let half_w = ow / 2.0;
         let radius = (half_w * half_w) / (2.0 * arch_height) + arch_height / 2.0;
-        let center_y = oh - arch_height + radius;
+        let center_y = radius; // peak at y=0
 
-        // Outer arc (arch above the rectangular part)
-        let start_angle = ((half_w / radius).asin()).to_degrees();
+        // Outer arc
+        let spring_angle = (half_w / radius).acos().to_degrees();
         arcs.push(Arc2D {
             cx: half_w,
             cy: center_y,
             radius,
-            start_angle: 180.0 - start_angle,
-            end_angle: start_angle,
+            start_angle: 180.0 - spring_angle,
+            end_angle: spring_angle,
             stroke_width: fw,
         });
 
         // Inner arc
         let inner_radius = radius - fw;
-        if inner_radius > 0.0 {
+        let inner_half_w = half_w - fw;
+        if inner_radius > 0.0 && inner_half_w > 0.0 {
+            let inner_ratio = (inner_half_w / inner_radius).min(1.0);
+            let inner_spring_angle = inner_ratio.acos().to_degrees();
             arcs.push(Arc2D {
                 cx: half_w,
                 cy: center_y,
                 radius: inner_radius,
-                start_angle: 180.0 - start_angle,
-                end_angle: start_angle,
+                start_angle: 180.0 - inner_spring_angle,
+                end_angle: inner_spring_angle,
                 stroke_width: 1.0,
             });
         }
     } else if kozijn.frame.shape.shape_type == ShapeType::Round {
         let radius = ow.min(oh) / 2.0;
+        let cx = ow / 2.0;
+        let cy = oh / 2.0;
+        // Outer circle (two semicircles, thin stroke — SVG fill handles the frame area)
         arcs.push(Arc2D {
-            cx: ow / 2.0,
-            cy: oh / 2.0,
-            radius,
-            start_angle: 0.0,
-            end_angle: 360.0,
-            stroke_width: fw,
+            cx, cy, radius,
+            start_angle: 180.0, end_angle: 0.0,
+            stroke_width: 2.0,
         });
+        arcs.push(Arc2D {
+            cx, cy, radius,
+            start_angle: 0.0, end_angle: -180.0,
+            stroke_width: 2.0,
+        });
+        // Inner circle (glass opening edge)
+        let inner_r = radius - fw;
+        if inner_r > 0.0 {
+            arcs.push(Arc2D {
+                cx, cy, radius: inner_r,
+                start_angle: 180.0, end_angle: 0.0,
+                stroke_width: 1.5,
+            });
+            arcs.push(Arc2D {
+                cx, cy, radius: inner_r,
+                start_angle: 0.0, end_angle: -180.0,
+                stroke_width: 1.5,
+            });
+        }
     }
 
     // Trapezoid polygon computation
@@ -359,7 +447,7 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     if kozijn.frame.shape.shape_type == ShapeType::Trapezoid
         || kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid
     {
-        let top_w = kozijn.frame.shape.top_width.unwrap_or(ow * 0.6);
+        let _top_w = kozijn.frame.shape.top_width.unwrap_or(ow * 0.6);
         let left_angle_deg = kozijn.frame.shape.left_angle.unwrap_or(90.0);
         let right_angle_deg = kozijn.frame.shape.right_angle.unwrap_or(90.0);
 

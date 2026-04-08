@@ -12,12 +12,52 @@
     "glazingRebate": 24,
     "maxGlassWeight": 80,
     "crossSection": [
-      [0, 0], [67, 0], [67, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        90
+      ],
+      [
+        55,
+        90
+      ],
+      [
+        55,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["frame", "door_frame"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016"]
+    "applicableAs": [
+      "frame",
+      "door_frame"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "weekamp-56x67-stomp",
@@ -32,12 +72,41 @@
     "glazingRebate": 0,
     "maxGlassWeight": null,
     "crossSection": [
-      [0, 0], [56, 0], [56, 67], [0, 67]
+      [
+        0,
+        0
+      ],
+      [
+        56,
+        0
+      ],
+      [
+        56,
+        67
+      ],
+      [
+        0,
+        67
+      ]
     ],
-    "ufValue": 2.0,
-    "applicableAs": ["door_frame"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "ufValue": 2,
+    "applicableAs": [
+      "door_frame"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 0,
+      "depth": 0,
+      "type": "geen"
+    }
   },
   {
     "id": "weekamp-67x150-dorpel",
@@ -52,11 +121,48 @@
     "glazingRebate": 24,
     "maxGlassWeight": null,
     "crossSection": [
-      [0, 0], [67, 0], [67, 150], [0, 150]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        126
+      ],
+      [
+        55,
+        126
+      ],
+      [
+        55,
+        150
+      ],
+      [
+        0,
+        150
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["sill"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "applicableAs": [
+      "sill"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   }
 ]

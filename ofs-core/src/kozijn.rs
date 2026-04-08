@@ -86,8 +86,17 @@ impl Kozijn {
                 bottom_profile: None,
                 left_profile: None,
                 right_profile: None,
+                top_material: None,
+                bottom_material: None,
+                left_material: None,
+                right_material: None,
                 shape: FrameShape::default(),
-                corner_joints: vec![],
+                corner_joints: vec![
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                ],
                 edges: vec![],
             },
             grid: Grid {
@@ -130,8 +139,17 @@ impl Kozijn {
                 bottom_profile: Some(sj.onderdorpel_profile.clone()),
                 left_profile: Some(sj.stijl_profile.clone()),
                 right_profile: Some(sj.stijl_profile.clone()),
+                top_material: None,
+                bottom_material: None,
+                left_material: None,
+                right_material: None,
                 shape: FrameShape::default(),
-                corner_joints: vec![],
+                corner_joints: vec![
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                    crate::joint::Joint::default(),
+                ],
                 edges: vec![],
             },
             grid: Grid {
@@ -275,6 +293,15 @@ pub struct Frame {
     /// Frame shape (rectangular, arched, round)
     #[serde(default)]
     pub shape: FrameShape,
+    /// Per-member material overrides (None = use default frame material)
+    #[serde(default)]
+    pub top_material: Option<Material>,
+    #[serde(default)]
+    pub bottom_material: Option<Material>,
+    #[serde(default)]
+    pub left_material: Option<Material>,
+    #[serde(default)]
+    pub right_material: Option<Material>,
     /// Corner joint configurations [top-left, top-right, bottom-left, bottom-right]
     #[serde(default)]
     pub corner_joints: Vec<crate::joint::Joint>,

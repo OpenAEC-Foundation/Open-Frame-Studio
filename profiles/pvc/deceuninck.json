@@ -14,11 +14,53 @@
     "glazingRebate": 26,
     "maxGlassThickness": 70,
     "steelReinforced": true,
-    "crossSection": [[0,0],[76,0],[76,76],[0,76]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        26
+      ],
+      [
+        76,
+        26
+      ],
+      [
+        76,
+        76
+      ],
+      [
+        0,
+        76
+      ]
+    ],
     "ufValue": 0.88,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "acrylcolor"],
-    "colors": ["wit", "creme", "antraciet", "houtdecor"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "acrylcolor"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet",
+      "houtdecor"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 26,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "deceuninck-eforte-84",
@@ -35,10 +77,50 @@
     "glazingRebate": 28,
     "maxGlassThickness": 56,
     "steelReinforced": true,
-    "crossSection": [[0,0],[84,0],[84,84],[0,84]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        84,
+        28
+      ],
+      [
+        84,
+        84
+      ],
+      [
+        0,
+        84
+      ]
+    ],
     "ufValue": 0.95,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie"],
-    "colors": ["wit", "creme", "antraciet"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   }
 ]

@@ -14,10 +14,12 @@
     updateGridSizes,
     updateFrameColors,
     calculateThermal,
+    updateCellSashProfile,
   } from "../../stores/kozijn.js";
   import { allProfiles } from "../../stores/profiles.js";
   import { PANEL_TYPE_KEYS, panelLabel, memberLabel } from "../../lib/labels.js";
   import HardwarePanel from "./HardwarePanel.svelte";
+  import JointPanel from "./JointPanel.svelte";
   import GlazingPanel from "./GlazingPanel.svelte";
   import ProfileSelector from "./ProfileSelector.svelte";
   import ProfileCrossSection from "./ProfileCrossSection.svelte";
@@ -227,16 +229,17 @@
         </div>
       {/if}
       {#if $currentKozijn.frame.shape?.shapeType === "trapezoid" || $currentKozijn.frame.shape?.shapeType === "arched_trapezoid"}
+        {@const shape = $currentKozijn.frame.shape}
+        {@const shapeType = shape.shapeType}
         <div class="field-row">
           <div class="field">
             <label>{$_('props.leftAngle') || "Hoek links (°)"}</label>
             <input
               type="number"
-              value={$currentKozijn.frame.shape.leftAngle || 75}
+              value={shape.leftAngle || 75}
               onchange={(e) => {
                 const angle = parseFloat(e.target.value);
-                updateFrameShape("trapezoid", null);
-                // TODO: pass angle through extended updateFrameShape
+                updateFrameShape(shapeType, shape.archHeight, shape.topWidth, angle, shape.rightAngle || 75);
               }}
               min="45" max="90" step="1"
             />
@@ -245,10 +248,10 @@
             <label>{$_('props.rightAngle') || "Hoek rechts (°)"}</label>
             <input
               type="number"
-              value={$currentKozijn.frame.shape.rightAngle || 75}
+              value={shape.rightAngle || 75}
               onchange={(e) => {
                 const angle = parseFloat(e.target.value);
-                updateFrameShape("trapezoid", null);
+                updateFrameShape(shapeType, shape.archHeight, shape.topWidth, shape.leftAngle || 75, angle);
               }}
               min="45" max="90" step="1"
             />
@@ -258,8 +261,8 @@
           <label>{$_('props.topWidth') || "Breedte boven (mm)"}</label>
           <input
             type="number"
-            value={$currentKozijn.frame.shape.topWidth || Math.round($currentKozijn.frame.outerWidth * 0.6)}
-            onchange={(e) => updateFrameShape("trapezoid", null)}
+            value={shape.topWidth || Math.round($currentKozijn.frame.outerWidth * 0.6)}
+            onchange={(e) => updateFrameShape(shapeType, shape.archHeight, parseFloat(e.target.value), shape.leftAngle, shape.rightAngle)}
             min="200"
             max={$currentKozijn.frame.outerWidth}
             step="10"
@@ -383,7 +386,7 @@
             label={$_('props.sashProfile')}
             filter="sash"
             value={selectedCell.sashProfile}
-            onchange={(detail) => {/* TODO: update sash profile */}}
+            onchange={(detail) => updateCellSashProfile($selectedCellIndex, detail.id, detail.name, detail.width, detail.depth)}
           />
           {#if selectedCell.sashProfile}
             <div class="field-row">
@@ -414,12 +417,13 @@
             label={$_('props.doorProfile')}
             filter="sash"
             value={selectedCell.sashProfile}
-            onchange={(detail) => {/* TODO: update sash profile */}}
+            onchange={(detail) => updateCellSashProfile($selectedCellIndex, detail.id, detail.name, detail.width, detail.depth)}
           />
         {/if}
       </div>
       <GlazingPanel />
       <HardwarePanel visible={true} />
+      <JointPanel visible={true} />
     {:else}
       <div class="section hint">
         <p>{$_('props.hint')}</p>

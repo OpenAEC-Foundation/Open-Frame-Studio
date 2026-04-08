@@ -9,10 +9,42 @@
     "sightline": 54,
     "glazingRebate": 24,
     "crossSection": [
-      [0, 0], [67, 0], [67, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        90
+      ],
+      [
+        55,
+        90
+      ],
+      [
+        55,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["frame", "sash", "divider"]
+    "applicableAs": [
+      "frame",
+      "sash",
+      "divider"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "wood-meranti-67x150",
@@ -24,10 +56,40 @@
     "sightline": 54,
     "glazingRebate": 24,
     "crossSection": [
-      [0, 0], [67, 0], [67, 150], [0, 150]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        126
+      ],
+      [
+        55,
+        126
+      ],
+      [
+        55,
+        150
+      ],
+      [
+        0,
+        150
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["sill"]
+    "applicableAs": [
+      "sill"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "wood-meranti-54x114",
@@ -39,9 +101,39 @@
     "sightline": 42,
     "glazingRebate": 24,
     "crossSection": [
-      [0, 0], [54, 0], [54, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        42,
+        90
+      ],
+      [
+        42,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["divider"]
+    "applicableAs": [
+      "divider"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   }
 ]

@@ -40,7 +40,7 @@
         <span class="value">&euro; {grandTotal.toFixed(2)}</span>
       </div>
       <div class="summary-card">
-        <span class="label">{$_('calculation.frames')}</span>
+        <span class="label">{$_('calculation.kozijnen')}</span>
         <span class="value">{estimates.length}</span>
       </div>
       <div class="summary-card">
@@ -53,17 +53,17 @@
     <div class="table-container">
       <table>
         <colgroup>
-          <col style="width:6%"><col style="width:8%"><col style="width:9%"><col style="width:9%">
+          <col style="width:7%"><col style="width:10%"><col style="width:9%"><col style="width:9%">
           <col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%">
-          <col style="width:9%"><col style="width:7%"><col style="width:10%">
+          <col style="width:9%"><col style="width:8%"><col style="width:13%">
         </colgroup>
         <thead><tr>
-          <th>{$_('calculation.nlSfb')}</th>
-          <th>{$_('calculation.frame')}</th>
+          <th>{$_('calculation.nlsfb')}</th>
+          <th>{$_('calculation.kozijn')}</th>
           <th class="num">{$_('calculation.material')}</th>
           <th class="num">{$_('calculation.glass')}</th>
           <th class="num">{$_('calculation.hardware')}</th>
-          <th class="num">{$_('calculation.gasket')}</th>
+          <th class="num">{$_('calculation.rubber')}</th>
           <th class="num">{$_('calculation.panels')}</th>
           <th class="num">{$_('calculation.surface')}</th>
           <th class="num">{$_('calculation.labor')}</th>
@@ -109,8 +109,8 @@
     <div class="table-container">
       <table>
         <thead><tr>
-          <th>{$_('calculation.nlSfb')}</th><th>{$_('calculation.description')}</th><th>{$_('calculation.quantity')}</th>
-          <th>{$_('calculation.unit')}</th><th>{$_('calculation.unitPrice')}</th><th>{$_('calculation.total')}</th>
+          <th>{$_('calculation.nlsfb')}</th><th>{$_('calculation.costBreakdown')}</th><th class="num">{$_('calculation.quantity')}</th>
+          <th>{$_('calculation.unit')}</th><th class="num">{$_('calculation.unitPrice')}</th><th class="num">{$_('calculation.total')}</th>
         </tr></thead>
         <tbody>
           {#each estimates as est}

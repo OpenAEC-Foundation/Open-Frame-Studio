@@ -2,9 +2,29 @@
   import { _ } from "svelte-i18n";
   import { invoke } from "../../lib/tauri.js";
   import { refreshProject } from "../../stores/project.js";
-  import { loadProfiles } from "../../stores/profiles.js";
+  import { loadProfiles, allProfiles } from "../../stores/profiles.js";
 
   let { visible = $bindable(false), editProfile = null, onsaved = null, onclose = null } = $props();
+
+  // === Library browser ===
+  let showLibrary = $state(false);
+
+  function loadFromLibrary(profile) {
+    if (!profile) return;
+    name = profile.name || name;
+    material = profile.material || material;
+    materialSubtype = profile.materialSubtype || materialSubtype;
+    width = profile.width || width;
+    depth = profile.depth || depth;
+    if (profile.sponning) {
+      sponningType = profile.sponning.type || sponningType;
+      sponningWidth = profile.sponning.width || sponningWidth;
+      sponningDepth = profile.sponning.depth || sponningDepth;
+    }
+    if (profile.ufValue) ufValue = profile.ufValue;
+    if (profile.series) profileSeries = profile.series.includes("90") ? "90" : profile.series.includes("78") ? "78" : "67";
+    showLibrary = false;
+  }
 
   // === Profile Parameters ===
   let name = $_('shapeManager.defaultName');
@@ -41,6 +61,108 @@
 
   // Applicability
   let applicableAs = { frame: true, sash: true, divider: true, sill: false };
+
+  // === Freeform Drawing Mode ===
+  let drawMode = $state("parametric"); // "parametric" | "freeform"
+  let freeformPoints = $state([]); // Array of [x, y] for freeform mode
+  let draggingPoint = $state(null); // index of point being dragged
+  let dragStart = $state(null); // { x, y } mouse start in SVG coords
+  let undoStack = $state([]);
+
+  function switchToFreeform() {
+    // Copy current parametric cross-section as starting point
+    freeformPoints = [...crossSection.map(p => [...p])];
+    undoStack = [];
+    drawMode = "freeform";
+  }
+
+  function switchToParametric() {
+    drawMode = "parametric";
+    freeformPoints = [];
+    draggingPoint = null;
+  }
+
+  function freeformUndo() {
+    if (undoStack.length === 0) return;
+    freeformPoints = undoStack.pop();
+    undoStack = [...undoStack]; // trigger reactivity
+  }
+
+  function pushFreeformUndo() {
+    undoStack = [...undoStack, freeformPoints.map(p => [...p])];
+    if (undoStack.length > 50) undoStack = undoStack.slice(-50);
+  }
+
+  // SVG coordinate conversion
+  function svgCoords(e, svgEl) {
+    const pt = svgEl.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const ctm = svgEl.getScreenCTM().inverse();
+    const svgPt = pt.matrixTransform(ctm);
+    return [Math.round(svgPt.x), Math.round(svgPt.y)];
+  }
+
+  function handleSvgMouseDown(e, idx, svgEl) {
+    if (drawMode !== "freeform") return;
+    e.preventDefault();
+    e.stopPropagation();
+    pushFreeformUndo();
+    draggingPoint = idx;
+    selectedPointIdx = idx;
+  }
+
+  function handleSvgMouseMove(e, svgEl) {
+    if (draggingPoint === null || drawMode !== "freeform") return;
+    const [x, y] = svgCoords(e, svgEl);
+    // Snap to 1mm grid
+    freeformPoints[draggingPoint] = [x, y];
+    freeformPoints = [...freeformPoints]; // trigger reactivity
+  }
+
+  function handleSvgMouseUp() {
+    draggingPoint = null;
+  }
+
+  function handleSvgDblClick(e, svgEl) {
+    if (drawMode !== "freeform") return;
+    e.preventDefault();
+    const [mx, my] = svgCoords(e, svgEl);
+
+    // Find the nearest edge to insert a point
+    let bestDist = Infinity;
+    let bestIdx = 0;
+    for (let i = 0; i < freeformPoints.length; i++) {
+      const j = (i + 1) % freeformPoints.length;
+      const [ax, ay] = freeformPoints[i];
+      const [bx, by] = freeformPoints[j];
+      // Distance from point to line segment
+      const dx = bx - ax, dy = by - ay;
+      const len2 = dx * dx + dy * dy;
+      let t = len2 > 0 ? ((mx - ax) * dx + (my - ay) * dy) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const px = ax + t * dx, py = ay + t * dy;
+      const dist = Math.sqrt((mx - px) ** 2 + (my - py) ** 2);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = j;
+      }
+    }
+
+    pushFreeformUndo();
+    freeformPoints.splice(bestIdx, 0, [mx, my]);
+    freeformPoints = [...freeformPoints];
+    selectedPointIdx = bestIdx;
+  }
+
+  function deleteSelectedPoint() {
+    if (drawMode !== "freeform" || selectedPointIdx < 0) return;
+    if (freeformPoints.length <= 3) return; // minimum triangle
+    pushFreeformUndo();
+    freeformPoints.splice(selectedPointIdx, 1);
+    freeformPoints = [...freeformPoints];
+    selectedPointIdx = -1;
+  }
 
   // Slope (onderdorpel)
   let slopeDegrees = 9;
@@ -109,7 +231,8 @@
   }
 
   // === Cross-section Generation ===
-  let crossSection = $derived(generateCrossSection());
+  let crossSectionParametric = $derived(generateCrossSection());
+  let crossSection = $derived(drawMode === "freeform" && freeformPoints.length > 2 ? freeformPoints : crossSectionParametric);
   let pathD = $derived(crossSection.length > 2
     ? `M ${crossSection.map(p => `${p[0]} ${p[1]}`).join(" L ")} Z`
     : ""
@@ -296,6 +419,7 @@
   }
 
   // SVG preview settings
+  let svgPreviewEl = $state(null);
   const PAD = 25;
   let viewBox = $derived(`${-PAD} ${-PAD} ${width + 2 * PAD + 50} ${depth + 2 * PAD + 20}`);
 
@@ -318,33 +442,80 @@
       <div class="body">
         <!-- LEFT: Interactive SVG Preview -->
         <div class="preview-col">
-          <div class="preview-label">{$_('shapeManager.crossSectionLabel')}</div>
-          <svg width="300" height="380" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" class="profile-svg">
+          <div class="preview-label">
+            {$_('shapeManager.crossSectionLabel')}
+            <div class="mode-toggle">
+              <button class="mode-btn" class:active={drawMode === "parametric"} onclick={switchToParametric}>Parametrisch</button>
+              <button class="mode-btn" class:active={drawMode === "freeform"} onclick={switchToFreeform}>Vrij tekenen</button>
+            </div>
+          </div>
+          {#if drawMode === "freeform"}
+            <div class="freeform-toolbar">
+              <button class="tool-btn" onclick={freeformUndo} disabled={undoStack.length === 0} title="Ongedaan maken">↩ Undo</button>
+              <button class="tool-btn" onclick={deleteSelectedPoint} disabled={selectedPointIdx < 0 || freeformPoints.length <= 3} title="Verwijder punt">🗑 Punt</button>
+              <span class="tool-hint">Dubbelklik = punt toevoegen · Sleep = verplaatsen</span>
+            </div>
+          {/if}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <svg
+            bind:this={svgPreviewEl}
+            width="300" height="380" viewBox={viewBox} preserveAspectRatio="xMidYMid meet"
+            class="profile-svg"
+            class:freeform-cursor={drawMode === "freeform"}
+            onmousemove={(e) => handleSvgMouseMove(e, svgPreviewEl)}
+            onmouseup={handleSvgMouseUp}
+            onmouseleave={handleSvgMouseUp}
+            ondblclick={(e) => handleSvgDblClick(e, svgPreviewEl)}
+          >
+            <!-- Grid (freeform mode) -->
+            {#if drawMode === "freeform"}
+              <defs>
+                <pattern id="grid5" width="5" height="5" patternUnits="userSpaceOnUse">
+                  <path d="M 5 0 L 0 0 0 5" fill="none" stroke="rgba(136,136,136,0.15)" stroke-width="0.3"/>
+                </pattern>
+              </defs>
+              <rect x={-PAD} y={-PAD} width={width + 2 * PAD + 50} height={depth + 2 * PAD + 20} fill="url(#grid5)" />
+            {/if}
+
             <!-- Profile shape -->
             <path d={pathD} fill="var(--bg-surface-alt, #E7E5E4)" stroke="var(--amber, #D97706)" stroke-width="1.5" />
 
-            <!-- Sponning zones -->
-            {#if sponningType === "binnensponning" || sponningType === "draaikiep"}
+            <!-- Sponning zones (parametric mode only) -->
+            {#if drawMode === "parametric" && (sponningType === "binnensponning" || sponningType === "draaikiep")}
               <rect x={sponningWidth} y={depth - sponningDepth} width={width - 2 * sponningWidth} height={sponningDepth}
                 fill="rgba(59, 130, 246, 0.08)" stroke="rgba(59, 130, 246, 0.3)" stroke-width="0.4" stroke-dasharray="2 2" />
             {/if}
 
-            <!-- Rubber groeven (draaikiep) -->
-            {#if sponningType === "draaikiep"}
+            <!-- Rubber groeven (draaikiep, parametric only) -->
+            {#if drawMode === "parametric" && sponningType === "draaikiep"}
               <line x1={width - sponningWidth + 2} y1={depth - sponningDepth + 3} x2={width - sponningWidth + opdekWidth - 2} y2={depth - sponningDepth + 3}
                 stroke="#DC2626" stroke-width="1.5" stroke-dasharray="1 1" />
               <line x1={width - sponningWidth + 2} y1={depth - 3} x2={width - sponningWidth + opdekWidth - 2} y2={depth - 3}
                 stroke="#DC2626" stroke-width="1.5" stroke-dasharray="1 1" />
             {/if}
 
-            <!-- Clickable contour points -->
+            <!-- Edge lines between points (freeform: highlight on hover) -->
+            {#if drawMode === "freeform"}
+              {#each crossSection as pt, i}
+                {@const next = crossSection[(i + 1) % crossSection.length]}
+                <line x1={pt[0]} y1={pt[1]} x2={next[0]} y2={next[1]}
+                  stroke="transparent" stroke-width="6" class="edge-hitarea"
+                />
+              {/each}
+            {/if}
+
+            <!-- Contour points (draggable in freeform mode) -->
             {#each crossSection as pt, i}
-              <circle cx={pt[0]} cy={pt[1]} r={selectedPointIdx === i ? 3 : 2}
-                fill={selectedPointIdx === i ? "var(--amber)" : "#fff"}
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <circle cx={pt[0]} cy={pt[1]}
+                r={selectedPointIdx === i ? 4 : draggingPoint === i ? 4 : 2.5}
+                fill={selectedPointIdx === i ? "var(--amber)" : draggingPoint === i ? "#ff6b6b" : "#fff"}
                 stroke={selectedPointIdx === i ? "var(--amber)" : "#888"}
                 stroke-width="0.8"
                 class="point"
+                class:draggable={drawMode === "freeform"}
                 onclick={() => handlePointClick(i)}
+                onmousedown={(e) => handleSvgMouseDown(e, i, svgPreviewEl)}
               />
             {/each}
 
@@ -387,6 +558,26 @@
 
         <!-- RIGHT: Parameters -->
         <div class="params-col">
+          <!-- Library browser -->
+          <div class="psection">
+            <button class="library-btn" onclick={() => showLibrary = !showLibrary}>
+              📚 {showLibrary ? "Verberg bibliotheek" : "Laden uit bibliotheek"}
+            </button>
+            {#if showLibrary}
+              <div class="library-list">
+                {#each ($allProfiles || []).filter(p => p.material === material || !material) as prof}
+                  <button class="library-item" onclick={() => loadFromLibrary(prof)}>
+                    <span class="lib-name">{prof.name}</span>
+                    <span class="lib-dims">{prof.width}×{prof.depth}mm</span>
+                  </button>
+                {/each}
+                {#if ($allProfiles || []).length === 0}
+                  <span class="lib-empty">Geen profielen gevonden</span>
+                {/if}
+              </div>
+            {/if}
+          </div>
+
           <div class="psection">
             <div class="field">
               <label>{$_('props.name')}</label>
@@ -736,4 +927,145 @@
     border-radius: var(--radius-sm);
   }
   .btn-secondary:hover { background: var(--bg-surface); }
+
+  .mode-toggle {
+    display: flex;
+    gap: 2px;
+    margin-top: var(--sp-1);
+  }
+
+  .mode-btn {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid var(--border-color, #444);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: default;
+    transition: all 0.15s;
+  }
+
+  .mode-btn.active {
+    background: var(--amber);
+    color: var(--bg-surface);
+    border-color: var(--amber);
+  }
+
+  .freeform-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-2);
+    background: var(--bg-surface-alt);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--sp-1);
+  }
+
+  .tool-btn {
+    padding: 2px 6px;
+    font-size: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color, #444);
+    border-radius: 3px;
+    color: var(--text-primary);
+    cursor: default;
+  }
+
+  .tool-btn:hover:not(:disabled) {
+    background: var(--amber);
+    color: var(--bg-surface);
+    border-color: var(--amber);
+  }
+
+  .tool-btn:disabled {
+    opacity: 0.4;
+  }
+
+  .tool-hint {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .profile-svg.freeform-cursor {
+    cursor: crosshair;
+  }
+
+  .point.draggable {
+    cursor: grab;
+  }
+
+  .point.draggable:active {
+    cursor: grabbing;
+  }
+
+  .edge-hitarea {
+    cursor: cell;
+  }
+
+  .library-btn {
+    width: 100%;
+    padding: var(--sp-2) var(--sp-3);
+    background: transparent;
+    border: 1px dashed var(--amber);
+    border-radius: var(--radius-sm);
+    color: var(--amber);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: default;
+    transition: all 0.15s;
+  }
+  .library-btn:hover { background: rgba(217, 119, 6, 0.1); }
+
+  .library-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .library-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color, #333);
+    border-radius: var(--radius-sm);
+    cursor: default;
+    transition: all 0.1s;
+  }
+  .library-item:hover {
+    background: var(--amber);
+    color: var(--bg-surface);
+    border-color: var(--amber);
+  }
+  .library-item:hover .lib-dims { color: var(--bg-surface); }
+
+  .lib-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .lib-dims {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: var(--sp-2);
+    flex-shrink: 0;
+  }
+
+  .lib-empty {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--sp-2);
+  }
 </style>

@@ -15,11 +15,51 @@
     "maxGlassThickness": 40,
     "steelReinforced": true,
     "wallThickness": "Klasse A",
-    "crossSection": [[0,0],[70,0],[70,70],[0,70]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        24
+      ],
+      [
+        70,
+        24
+      ],
+      [
+        70,
+        70
+      ],
+      [
+        0,
+        70
+      ]
+    ],
     "ufValue": 1.3,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie"],
-    "colors": ["wit", "creme", "antraciet grijs"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet grijs"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 24,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "veka-softline82",
@@ -38,12 +78,55 @@
     "maxGlassThickness": 52,
     "steelReinforced": true,
     "wallThickness": "Klasse A (3mm)",
-    "crossSection": [[0,0],[82,0],[82,82],[0,82]],
-    "ufValue": 1.0,
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        82,
+        28
+      ],
+      [
+        82,
+        82
+      ],
+      [
+        0,
+        82
+      ]
+    ],
+    "ufValue": 1,
     "uwTripleGlass": 0.91,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "spectral"],
-    "colors": ["wit", "creme", "antraciet grijs", "jet zwart", "staalblauw"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "spectral"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet grijs",
+      "jet zwart",
+      "staalblauw"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "veka-ekipazz-sliding",
@@ -60,10 +143,51 @@
     "maxGlassThickness": 52,
     "maxWeight": 200,
     "steelReinforced": true,
-    "crossSection": [[0,0],[160,0],[160,82],[0,82]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        160,
+        28
+      ],
+      [
+        160,
+        82
+      ],
+      [
+        0,
+        82
+      ]
+    ],
     "ufValue": 1.1,
-    "applicableAs": ["frame", "sliding_sash"],
-    "finishes": ["wit", "folie", "spectral"],
-    "colors": ["wit", "antraciet grijs", "jet zwart"]
+    "applicableAs": [
+      "frame",
+      "sliding_sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "spectral"
+    ],
+    "colors": [
+      "wit",
+      "antraciet grijs",
+      "jet zwart"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   }
 ]

@@ -12,12 +12,52 @@
     "glazingRebate": 20,
     "maxGlassWeight": 70,
     "profileType": "A",
-    "crossSection": [[0,0],[66,0],[66,110],[0,110]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        66,
+        0
+      ],
+      [
+        66,
+        90
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        54,
+        110
+      ],
+      [
+        0,
+        110
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["frame"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016"],
-    "description": "Stijl en bovendorpel met sponning aan achterzijde voor spouwlat"
+    "applicableAs": [
+      "frame"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016"
+    ],
+    "description": "Stijl en bovendorpel met sponning aan achterzijde voor spouwlat",
+    "sponning": {
+      "width": 12,
+      "depth": 20,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "abc-b-66x110",
@@ -32,12 +72,51 @@
     "glazingRebate": 20,
     "maxGlassWeight": null,
     "profileType": "B",
-    "crossSection": [[0,0],[66,0],[66,110],[0,110]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        66,
+        0
+      ],
+      [
+        66,
+        90
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        54,
+        110
+      ],
+      [
+        0,
+        110
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["divider"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"],
-    "description": "Tussenstijl met dubbele sponning (beide zijden)"
+    "applicableAs": [
+      "divider"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "description": "Tussenstijl met dubbele sponning (beide zijden)",
+    "sponning": {
+      "width": 12,
+      "depth": 20,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "abc-c-66x110",
@@ -52,12 +131,51 @@
     "glazingRebate": 20,
     "maxGlassWeight": null,
     "profileType": "C",
-    "crossSection": [[0,0],[66,0],[66,110],[0,110]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        66,
+        0
+      ],
+      [
+        66,
+        90
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        54,
+        110
+      ],
+      [
+        0,
+        110
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["sill"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"],
-    "description": "Onderdorpel met schuine onderzijde voor waterafvoer"
+    "applicableAs": [
+      "sill"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "description": "Onderdorpel met schuine onderzijde voor waterafvoer",
+    "sponning": {
+      "width": 12,
+      "depth": 20,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "abc-d-66x110",
@@ -72,11 +190,50 @@
     "glazingRebate": 20,
     "maxGlassWeight": null,
     "profileType": "D",
-    "crossSection": [[0,0],[66,0],[66,110],[0,110]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        66,
+        0
+      ],
+      [
+        66,
+        90
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        54,
+        110
+      ],
+      [
+        0,
+        110
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["divider_horizontal"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"],
-    "description": "Horizontale tussendorpel (kalf) tussen deur en bovenlicht"
+    "applicableAs": [
+      "divider_horizontal"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "description": "Horizontale tussendorpel (kalf) tussen deur en bovenlicht",
+    "sponning": {
+      "width": 12,
+      "depth": 20,
+      "type": "binnensponning"
+    }
   }
 ]

@@ -12,12 +12,52 @@
     "glazingRebate": 24,
     "maxGlassWeight": 80,
     "crossSection": [
-      [0, 0], [67, 0], [67, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        90
+      ],
+      [
+        55,
+        90
+      ],
+      [
+        55,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamwerk-67x130",
@@ -32,12 +72,51 @@
     "glazingRebate": 30,
     "maxGlassWeight": 100,
     "crossSection": [
-      [0, 0], [67, 0], [67, 130], [0, 130]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        100
+      ],
+      [
+        55,
+        100
+      ],
+      [
+        55,
+        130
+      ],
+      [
+        0,
+        130
+      ]
     ],
     "ufValue": 1.7,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 30,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamwerk-67x150-dorpel",
@@ -52,12 +131,49 @@
     "glazingRebate": 24,
     "maxGlassWeight": null,
     "crossSection": [
-      [0, 0], [67, 0], [67, 150], [0, 150]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        126
+      ],
+      [
+        55,
+        126
+      ],
+      [
+        55,
+        150
+      ],
+      [
+        0,
+        150
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["sill"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "applicableAs": [
+      "sill"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamwerk-54x114-tussenstijl",
@@ -72,11 +188,47 @@
     "glazingRebate": 24,
     "maxGlassWeight": null,
     "crossSection": [
-      [0, 0], [54, 0], [54, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        42,
+        90
+      ],
+      [
+        42,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["divider"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010"]
+    "applicableAs": [
+      "divider"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   }
 ]

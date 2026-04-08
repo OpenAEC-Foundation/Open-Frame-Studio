@@ -14,11 +14,53 @@
     "glazingRebate": 26,
     "maxGlassThickness": 50,
     "steelReinforced": true,
-    "crossSection": [[0,0],[76,0],[76,76],[0,76]],
-    "ufValue": 1.0,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "AluClip"],
-    "colors": ["wit", "creme", "antraciet", "houtdecor"]
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        26
+      ],
+      [
+        76,
+        26
+      ],
+      [
+        76,
+        76
+      ],
+      [
+        0,
+        76
+      ]
+    ],
+    "ufValue": 1,
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "AluClip"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet",
+      "houtdecor"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 26,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "kommerling-76md-proenergytech",
@@ -36,11 +78,52 @@
     "maxGlassThickness": 50,
     "steelReinforced": true,
     "thermalInsert": true,
-    "crossSection": [[0,0],[76,0],[76,76],[0,76]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        26
+      ],
+      [
+        76,
+        26
+      ],
+      [
+        76,
+        76
+      ],
+      [
+        0,
+        76
+      ]
+    ],
     "ufValue": 0.82,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "AluClip"],
-    "colors": ["wit", "creme", "antraciet"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "AluClip"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 26,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "kommerling-88md",
@@ -57,11 +140,53 @@
     "glazingRebate": 30,
     "maxGlassThickness": 56,
     "steelReinforced": true,
-    "crossSection": [[0,0],[88,0],[88,88],[0,88]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        30
+      ],
+      [
+        88,
+        30
+      ],
+      [
+        88,
+        88
+      ],
+      [
+        0,
+        88
+      ]
+    ],
     "ufValue": 1.2,
     "uwPassiveHouse": 0.72,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "AluClip Pro"],
-    "colors": ["wit", "creme", "antraciet", "jet zwart"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "AluClip Pro"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet",
+      "jet zwart"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 30,
+      "type": "buitensponning"
+    }
   }
 ]

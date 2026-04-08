@@ -13,15 +13,59 @@
     "glazingRebate": 25,
     "maxGlassThickness": 63,
     "minGlassThickness": 4,
-    "crossSection": [[0,0],[77,0],[77,68],[0,68]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        25
+      ],
+      [
+        77,
+        25
+      ],
+      [
+        77,
+        68
+      ],
+      [
+        0,
+        68
+      ]
+    ],
     "ufValue": 2.2,
     "uwValue": 1.4,
     "airTightness": "Klasse 4",
     "waterTightness": "E900",
     "windLoad": "C5",
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["gepoedercoat", "geanodiseerd"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "gepoedercoat",
+      "geanodiseerd"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 25,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "reynaers-cs77-hi-plus",
@@ -36,14 +80,58 @@
     "sightline": 51,
     "glazingRebate": 25,
     "maxGlassThickness": 63,
-    "crossSection": [[0,0],[77,0],[77,68],[0,68]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        25
+      ],
+      [
+        77,
+        25
+      ],
+      [
+        77,
+        68
+      ],
+      [
+        0,
+        68
+      ]
+    ],
     "ufValue": 1.2,
     "airTightness": "Klasse 4",
     "waterTightness": "E900",
     "windLoad": "C5",
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["gepoedercoat", "geanodiseerd"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "gepoedercoat",
+      "geanodiseerd"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 25,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "reynaers-cs86-hi",
@@ -59,11 +147,55 @@
     "glazingRebate": 25,
     "maxGlassThickness": 72,
     "minGlassThickness": 10,
-    "crossSection": [[0,0],[86,0],[86,77],[0,77]],
-    "ufValue": 1.0,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["gepoedercoat", "geanodiseerd"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        25
+      ],
+      [
+        86,
+        25
+      ],
+      [
+        86,
+        77
+      ],
+      [
+        0,
+        77
+      ]
+    ],
+    "ufValue": 1,
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "gepoedercoat",
+      "geanodiseerd"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 25,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "reynaers-cp155-sliding",
@@ -78,10 +210,51 @@
     "glazingRebate": 32,
     "maxGlassThickness": 52,
     "maxWeight": 400,
-    "crossSection": [[0,0],[155,0],[155,68],[0,68]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        32
+      ],
+      [
+        155,
+        32
+      ],
+      [
+        155,
+        68
+      ],
+      [
+        0,
+        68
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["frame", "sliding_sash"],
-    "finishes": ["gepoedercoat", "geanodiseerd"],
-    "colors": ["RAL9010", "RAL7016", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sliding_sash"
+    ],
+    "finishes": [
+      "gepoedercoat",
+      "geanodiseerd"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL7016",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 32,
+      "type": "buitensponning"
+    }
   }
 ]

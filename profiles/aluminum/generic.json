@@ -9,10 +9,42 @@
     "sightline": 38,
     "glazingRebate": 28,
     "crossSection": [
-      [0, 0], [50, 0], [50, 70], [0, 70]
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        50,
+        28
+      ],
+      [
+        50,
+        70
+      ],
+      [
+        0,
+        70
+      ]
     ],
     "ufValue": 3.5,
-    "applicableAs": ["frame", "sash", "divider"]
+    "applicableAs": [
+      "frame",
+      "sash",
+      "divider"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "alu-generic-50x70-thermisch",
@@ -24,9 +56,41 @@
     "sightline": 38,
     "glazingRebate": 28,
     "crossSection": [
-      [0, 0], [50, 0], [50, 70], [0, 70]
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        50,
+        28
+      ],
+      [
+        50,
+        70
+      ],
+      [
+        0,
+        70
+      ]
     ],
     "ufValue": 1.8,
-    "applicableAs": ["frame", "sash", "divider"]
+    "applicableAs": [
+      "frame",
+      "sash",
+      "divider"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   }
 ]

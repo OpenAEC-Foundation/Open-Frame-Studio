@@ -12,13 +12,57 @@
     "sightline": 55,
     "glazingRebate": 24,
     "maxGlassWeight": 85,
-    "crossSection": [[0,0],[68,0],[68,114],[0,114]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        68,
+        0
+      ],
+      [
+        68,
+        90
+      ],
+      [
+        56,
+        90
+      ],
+      [
+        56,
+        114
+      ],
+      [
+        0,
+        114
+      ]
+    ],
     "ufValue": 1.7,
-    "uwValue": 1.0,
+    "uwValue": 1,
     "komo": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt", "transparant gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt",
+      "transparant gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "webo-nom-90x114",
@@ -33,13 +77,57 @@
     "sightline": 72,
     "glazingRebate": 32,
     "maxGlassWeight": 110,
-    "crossSection": [[0,0],[90,0],[90,114],[0,114]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        90,
+        0
+      ],
+      [
+        90,
+        82
+      ],
+      [
+        78,
+        82
+      ],
+      [
+        78,
+        114
+      ],
+      [
+        0,
+        114
+      ]
+    ],
     "ufValue": 1.2,
     "uwValue": 0.8,
     "komo": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt", "transparant gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt",
+      "transparant gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 32,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "webo-houtalu-68x90",
@@ -54,12 +142,53 @@
     "sightline": 55,
     "glazingRebate": 24,
     "maxGlassWeight": 90,
-    "crossSection": [[0,0],[68,0],[68,90],[0,90]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        68,
+        0
+      ],
+      [
+        68,
+        66
+      ],
+      [
+        56,
+        66
+      ],
+      [
+        56,
+        90
+      ],
+      [
+        0,
+        90
+      ]
+    ],
     "ufValue": 1.4,
     "komo": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL9001", "RAL7016", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL7016",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "webo-houtalu-90x90",
@@ -74,12 +203,53 @@
     "sightline": 72,
     "glazingRebate": 32,
     "maxGlassWeight": 110,
-    "crossSection": [[0,0],[90,0],[90,90],[0,90]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        90,
+        0
+      ],
+      [
+        90,
+        58
+      ],
+      [
+        78,
+        58
+      ],
+      [
+        78,
+        90
+      ],
+      [
+        0,
+        90
+      ]
+    ],
     "ufValue": 1.1,
     "komo": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL9001", "RAL7016", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL7016",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 32,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "webo-deur-54",
@@ -93,11 +263,51 @@
     "depth": 118,
     "sightline": 42,
     "glazingRebate": 17,
-    "crossSection": [[0,0],[54,0],[54,118],[0,118]],
-    "ufValue": 2.0,
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        101
+      ],
+      [
+        42,
+        101
+      ],
+      [
+        42,
+        118
+      ],
+      [
+        0,
+        118
+      ]
+    ],
+    "ufValue": 2,
     "komo": true,
-    "applicableAs": ["door_panel"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016"]
+    "applicableAs": [
+      "door_panel"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 17,
+      "type": "binnensponning"
+    }
   }
 ]

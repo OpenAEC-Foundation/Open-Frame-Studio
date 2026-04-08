@@ -25,16 +25,31 @@
 <div class="cross-section" style="width: {width}px; height: {height}px;">
   {#if pathD}
     <svg {width} {height} viewBox={viewBox} preserveAspectRatio="xMidYMid meet">
+      <!-- Profile outline with fill -->
       <path d={pathD} fill="var(--bg-surface-alt)" stroke="var(--amber)" stroke-width="0.8" />
+      <!-- Hatch pattern for material indication -->
+      <defs>
+        <pattern id="wood-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="4" stroke="var(--amber)" stroke-width="0.3" opacity="0.15" />
+        </pattern>
+      </defs>
+      <path d={pathD} fill="url(#wood-hatch)" stroke="none" />
       {#if sponning}
+        {@const xs = points.map(p => p[0])}
+        {@const ys = points.map(p => p[1])}
+        {@const maxX = Math.max(...xs)}
+        {@const maxY = Math.max(...ys)}
+        <!-- Sponning dimension annotation -->
         <text
-          x={points[0][0] + 2}
-          y={points[0][1] + 6}
-          font-size="4"
-          fill="var(--text-muted)"
+          x={maxX - 1}
+          y={maxY - sponning.depth / 2}
+          font-size="3.5"
+          fill="#22c55e"
           font-family="var(--font-body)"
+          font-weight="600"
+          text-anchor="end"
         >
-          SP {sponning.width}x{sponning.depth}
+          ↕{sponning.depth}
         </text>
       {/if}
     </svg>

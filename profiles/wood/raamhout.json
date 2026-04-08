@@ -14,11 +14,50 @@
     "profileType": "RSx",
     "sponningDepth": 17,
     "sponningWidth": 41,
-    "crossSection": [[0,0],[54,0],[54,67],[0,67]],
-    "ufValue": 2.0,
-    "applicableAs": ["sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        50
+      ],
+      [
+        42,
+        50
+      ],
+      [
+        42,
+        67
+      ],
+      [
+        0,
+        67
+      ]
+    ],
+    "ufValue": 2,
+    "applicableAs": [
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 17,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamhout-54x78",
@@ -33,11 +72,50 @@
     "glazingRebate": 17,
     "maxGlassWeight": 40,
     "profileType": "ROx",
-    "crossSection": [[0,0],[54,0],[54,78],[0,78]],
-    "ufValue": 2.0,
-    "applicableAs": ["sash_sill"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        61
+      ],
+      [
+        42,
+        61
+      ],
+      [
+        42,
+        78
+      ],
+      [
+        0,
+        78
+      ]
+    ],
+    "ufValue": 2,
+    "applicableAs": [
+      "sash_sill"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 17,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamhout-69x90",
@@ -51,11 +129,51 @@
     "sightline": 54,
     "glazingRebate": 24,
     "maxGlassWeight": 60,
-    "crossSection": [[0,0],[69,0],[69,90],[0,90]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        69,
+        0
+      ],
+      [
+        69,
+        66
+      ],
+      [
+        57,
+        66
+      ],
+      [
+        57,
+        90
+      ],
+      [
+        0,
+        90
+      ]
+    ],
     "ufValue": 1.8,
-    "applicableAs": ["sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016"]
+    "applicableAs": [
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "raamhout-84x90",
@@ -69,11 +187,51 @@
     "sightline": 66,
     "glazingRebate": 32,
     "maxGlassWeight": 80,
-    "crossSection": [[0,0],[84,0],[84,90],[0,90]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        84,
+        0
+      ],
+      [
+        84,
+        58
+      ],
+      [
+        72,
+        58
+      ],
+      [
+        72,
+        90
+      ],
+      [
+        0,
+        90
+      ]
+    ],
     "ufValue": 1.5,
-    "applicableAs": ["sash"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016"]
+    "applicableAs": [
+      "sash"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 32,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "deurhout-54x118",
@@ -87,10 +245,49 @@
     "sightline": 42,
     "glazingRebate": 17,
     "maxGlassWeight": null,
-    "crossSection": [[0,0],[54,0],[54,118],[0,118]],
-    "ufValue": 2.0,
-    "applicableAs": ["door_panel"],
-    "finishes": ["onbehandeld", "gegrond", "dekkend gelakt"],
-    "colors": ["RAL9010", "RAL9001"]
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        101
+      ],
+      [
+        42,
+        101
+      ],
+      [
+        42,
+        118
+      ],
+      [
+        0,
+        118
+      ]
+    ],
+    "ufValue": 2,
+    "applicableAs": [
+      "door_panel"
+    ],
+    "finishes": [
+      "onbehandeld",
+      "gegrond",
+      "dekkend gelakt"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 17,
+      "type": "binnensponning"
+    }
   }
 ]

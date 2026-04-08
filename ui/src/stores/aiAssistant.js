@@ -23,17 +23,18 @@ export const aiMessages = writable([]);
 export const aiLoading = writable(false);
 export const aiConfigured = writable(false);
 
-// Load saved config
-const savedEndpoint = getSetting("ai_endpoint") || "";
-const savedModel = getSetting("ai_model") || "gpt-4o-mini";
+// Load saved config — default to Ollama local if no config exists
+const DEFAULT_ENDPOINT = "http://localhost:11434/v1";
+const savedEndpoint = getSetting("ai_endpoint") || DEFAULT_ENDPOINT;
+const savedModel = getSetting("ai_model") || "llama3.1";
 const savedKey = getSetting("ai_key") || "";
 
 export const aiEndpoint = writable(savedEndpoint);
 export const aiModel = writable(savedModel);
 export const aiKey = writable(savedKey);
 
-// Check if configured
-if (savedEndpoint) aiConfigured.set(true);
+// Always consider configured if endpoint exists (default = Ollama)
+aiConfigured.set(!!savedEndpoint);
 
 export function configureAi(endpoint, key, model) {
   aiEndpoint.set(endpoint);
@@ -174,9 +175,18 @@ export async function sendMessage(text) {
     }
   } catch (e) {
     console.error("AI fout:", e);
+    const endpoint = get(aiEndpoint);
+    let errorMsg = `Fout: ${e.message}`;
+    if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError") || e.message.includes("fetch")) {
+      errorMsg = `Kan geen verbinding maken met ${endpoint}.\n\n` +
+        `Mogelijke oplossingen:\n` +
+        `• Ollama lokaal: start 'ollama serve' en zorg dat een model is gedownload (bijv. 'ollama pull llama3.1')\n` +
+        `• OpenAI: stel endpoint in op https://api.openai.com/v1 met API-key\n` +
+        `• Klik op ⚙️ om het AI endpoint te wijzigen`;
+    }
     aiMessages.update((msgs) => [
       ...msgs,
-      { role: "assistant", content: `Fout: ${e.message}`, isError: true },
+      { role: "assistant", content: errorMsg, isError: true },
     ]);
   } finally {
     aiLoading.set(false);

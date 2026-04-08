@@ -5,11 +5,11 @@
 
   let { visible = true } = $props();
 
-  let container;
-  let canvas;
-  let THREE = null;
-  let loading = true;
-  let loadError = false;
+  let container = $state(null);
+  let canvas = $state(null);
+  let THREE = $state(null);
+  let loading = $state(true);
+  let loadError = $state(false);
 
   // Three.js objects
   let renderer, scene, camera;
@@ -72,6 +72,14 @@
 
   function initScene() {
     if (!THREE || !canvas || !container) return;
+
+    // WebGL detection
+    const testCtx = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!testCtx) {
+      console.error("WebGL not available in this webview");
+      loadError = true;
+      return;
+    }
 
     // Renderer
     renderer = new THREE.WebGLRenderer({
@@ -328,15 +336,17 @@
   }
 
   // --- Reactive rebuild ---
-
-  let prevKozijn = null;
-  let prevGeometry = null;
+  // Use JSON serialization to detect deep changes (Svelte 5 $effect tracks references only)
+  let prevGeomJson = $state("");
 
   $effect(() => {
-    if (scene && ($currentKozijn !== prevKozijn || $currentGeometry !== prevGeometry)) {
-      prevKozijn = $currentKozijn;
-      prevGeometry = $currentGeometry;
-      build3DKozijn(scene, $currentKozijn, $currentGeometry);
+    const k = $currentKozijn;
+    const g = $currentGeometry;
+    if (!scene || !k || !g) return;
+    const newJson = JSON.stringify({ id: k.id, w: k.frame?.outerWidth, h: k.frame?.outerHeight, cells: k.cells?.length, shape: k.frame?.shape?.shapeType });
+    if (newJson !== prevGeomJson) {
+      prevGeomJson = newJson;
+      build3DKozijn(scene, k, g);
     }
   });
 
@@ -344,7 +354,7 @@
 
   let resizeObserver;
 
-  let threeLoaded = false;
+  let threeLoaded = $state(false);
 
   onMount(async () => {
     threeLoaded = await loadThreeJS();

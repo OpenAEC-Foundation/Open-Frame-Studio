@@ -522,6 +522,9 @@ pub fn update_frame_shape(
     id: String,
     shape_type: ShapeType,
     arch_height: Option<f64>,
+    top_width: Option<f64>,
+    left_angle: Option<f64>,
+    right_angle: Option<f64>,
 ) -> Result<Kozijn, String> {
     let mut project = state.project.lock().map_err(|e| e.to_string())?;
     let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
@@ -532,11 +535,29 @@ pub fn update_frame_shape(
         shape_type,
         arch_radius: None, // computed from arch_height in geometry
         arch_height,
-        top_width: None,
-        left_angle: None,
-        right_angle: None,
+        top_width,
+        left_angle,
+        right_angle,
     };
 
+    Ok(kozijn.clone())
+}
+
+#[tauri::command]
+pub fn update_corner_joints(
+    state: State<'_, AppState>,
+    id: String,
+    joints_json: String,
+) -> Result<Kozijn, String> {
+    let mut project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let kozijn = project.kozijnen.iter_mut().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+
+    let joints: Vec<ofs_core::joint::Joint> = serde_json::from_str(&joints_json)
+        .map_err(|e| format!("Ongeldige joints JSON: {}", e))?;
+
+    kozijn.frame.corner_joints = joints;
     Ok(kozijn.clone())
 }
 

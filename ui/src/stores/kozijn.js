@@ -151,16 +151,31 @@ export async function updateDividerProfile(dividerIndex, isColumn, profileId, pr
   await refreshProject();
 }
 
-export async function updateFrameShape(shapeType, archHeight) {
+export async function updateFrameShape(shapeType, archHeight, topWidth, leftAngle, rightAngle) {
   const k = get(currentKozijn);
   if (!k) return;
   pushSnapshot();
   const updated = await invoke("update_frame_shape", {
-    id: k.id, shapeType, archHeight: archHeight || null,
+    id: k.id, shapeType,
+    archHeight: archHeight || null,
+    topWidth: topWidth || null,
+    leftAngle: leftAngle || null,
+    rightAngle: rightAngle || null,
   });
   currentKozijn.set(updated);
   await refreshProject();
   await refreshGeometry(updated.id);
+}
+
+export async function updateCornerJoints(joints) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_corner_joints", {
+    id: k.id, jointsJson: JSON.stringify(joints),
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
 }
 
 export async function addCustomProfile(profileJson) {

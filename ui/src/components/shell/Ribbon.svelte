@@ -24,16 +24,55 @@
   import ShapeManager from "../panels/ShapeManager.svelte";
   import { _ } from "svelte-i18n";
   import { get } from "svelte/store";
+  import { invoke } from "../../lib/tauri.js";
+  import { toast } from "../../stores/toast.js";
 
   let showShapeManager = false;
 
-  const SJABLONEN = [
+  const BUILTIN_SJABLONEN = [
     { id: "standaard-67-meranti", name: "Standaard 67mm Meranti", series: "67" },
     { id: "standaard-67-accoya", name: "Standaard 67mm Accoya", series: "67" },
     { id: "zwaar-78-meranti", name: "Zwaar 78mm Meranti", series: "78" },
     { id: "passief-90-meranti", name: "Passief 90mm Meranti", series: "90" },
   ];
+  let customSjablonen = $state([]);
+  let allSjablonen = $derived([...BUILTIN_SJABLONEN, ...customSjablonen]);
   let activeSjabloonId = "standaard-67-meranti";
+
+  // Load custom sjablonen from backend
+  onMount(async () => {
+    try {
+      const all = await invoke("get_sjablonen", {});
+      customSjablonen = all.filter(s => !BUILTIN_SJABLONEN.find(b => b.id === s.id));
+    } catch (e) { /* ignore if command not available */ }
+  });
+
+  async function saveAsTemplate() {
+    const k = get(currentKozijn);
+    if (!k) return;
+    const name = prompt("Sjabloonnaam:", `Sjabloon ${k.mark || "custom"}`);
+    if (!name) return;
+    const sjabloon = {
+      id: `custom-${Date.now()}`,
+      name,
+      material: k.frame?.material || "wood",
+      profileSeries: `${k.frame?.frameWidth || 67}`,
+      frameWidth: k.frame?.frameWidth || 67,
+      frameDepth: k.frame?.frameDepth || 114,
+      sashWidth: k.cells?.[0]?.sashWidth || 67,
+      sashDepth: k.cells?.[0]?.sashDepth || 80,
+      defaultGlazing: { glassType: "HR++", thicknessMm: 24, ugValue: 1.0, spacerType: "warm_edge" },
+      colorInside: k.frame?.colorInside || "RAL9010",
+      colorOutside: k.frame?.colorOutside || "RAL9010",
+    };
+    try {
+      await invoke("save_custom_sjabloon", { sjabloonJson: JSON.stringify(sjabloon) });
+      customSjablonen = [...customSjablonen, sjabloon];
+      toast.success(`Sjabloon "${name}" opgeslagen`);
+    } catch (e) {
+      toast.error(`Fout bij opslaan: ${e}`);
+    }
+  }
 
   const tabs = [
     { id: "home", key: "ribbon.home" },
@@ -119,10 +158,13 @@
       <div class="ribbon-group">
         <span class="group-label">{$_('ribbon.template')}</span>
         <select class="sjabloon-select" bind:value={activeSjabloonId}>
-          {#each SJABLONEN as sj}
+          {#each allSjablonen as sj}
             <option value={sj.id}>{sj.name}</option>
           {/each}
         </select>
+        <button class="ribbon-btn-sm" onclick={saveAsTemplate} title="Huidig kozijn opslaan als sjabloon">
+          💾 Opslaan als sjabloon
+        </button>
       </div>
 
       <div class="ribbon-divider"></div>

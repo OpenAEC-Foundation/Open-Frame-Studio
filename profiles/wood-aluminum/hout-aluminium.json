@@ -14,12 +14,53 @@
     "aluCapWidth": 40,
     "aluCapDepth": 25,
     "crossSection": [
-      [0, 0], [67, 0], [67, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        90
+      ],
+      [
+        55,
+        90
+      ],
+      [
+        55,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.5,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "hout-alu-67x130",
@@ -36,12 +77,53 @@
     "aluCapWidth": 40,
     "aluCapDepth": 25,
     "crossSection": [
-      [0, 0], [67, 0], [67, 130], [0, 130]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        100
+      ],
+      [
+        55,
+        100
+      ],
+      [
+        55,
+        130
+      ],
+      [
+        0,
+        130
+      ]
     ],
     "ufValue": 1.4,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL9001", "RAL9016", "RAL7016", "RAL7021", "RAL9005", "DB703"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL9001",
+      "RAL9016",
+      "RAL7016",
+      "RAL7021",
+      "RAL9005",
+      "DB703"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 30,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "hout-alu-67x150-dorpel",
@@ -58,12 +140,48 @@
     "aluCapWidth": 50,
     "aluCapDepth": 30,
     "crossSection": [
-      [0, 0], [67, 0], [67, 150], [0, 150]
+      [
+        0,
+        0
+      ],
+      [
+        67,
+        0
+      ],
+      [
+        67,
+        126
+      ],
+      [
+        55,
+        126
+      ],
+      [
+        55,
+        150
+      ],
+      [
+        0,
+        150
+      ]
     ],
     "ufValue": 1.5,
-    "applicableAs": ["sill"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL7016", "RAL9005"]
+    "applicableAs": [
+      "sill"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL7016",
+      "RAL9005"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   },
   {
     "id": "hout-alu-54x114-tussenstijl",
@@ -80,11 +198,46 @@
     "aluCapWidth": 30,
     "aluCapDepth": 25,
     "crossSection": [
-      [0, 0], [54, 0], [54, 114], [0, 114]
+      [
+        0,
+        0
+      ],
+      [
+        54,
+        0
+      ],
+      [
+        54,
+        90
+      ],
+      [
+        42,
+        90
+      ],
+      [
+        42,
+        114
+      ],
+      [
+        0,
+        114
+      ]
     ],
     "ufValue": 1.5,
-    "applicableAs": ["divider"],
-    "finishes": ["hout gegrond + alu gepoedercoat"],
-    "colors": ["RAL9010", "RAL7016"]
+    "applicableAs": [
+      "divider"
+    ],
+    "finishes": [
+      "hout gegrond + alu gepoedercoat"
+    ],
+    "colors": [
+      "RAL9010",
+      "RAL7016"
+    ],
+    "sponning": {
+      "width": 12,
+      "depth": 24,
+      "type": "binnensponning"
+    }
   }
 ]

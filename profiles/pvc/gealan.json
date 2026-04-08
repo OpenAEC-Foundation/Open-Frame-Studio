@@ -14,11 +14,54 @@
     "glazingRebate": 24,
     "maxGlassThickness": 40,
     "steelReinforced": true,
-    "crossSection": [[0,0],[74,0],[74,74],[0,74]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        24
+      ],
+      [
+        74,
+        24
+      ],
+      [
+        74,
+        74
+      ],
+      [
+        0,
+        74
+      ]
+    ],
     "ufValue": 1.2,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "acrylcolor"],
-    "colors": ["wit", "creme", "antraciet", "houtdecor eiken", "houtdecor notenbruin"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "acrylcolor"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet",
+      "houtdecor eiken",
+      "houtdecor notenbruin"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 24,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "gealan-s9000",
@@ -35,15 +78,58 @@
     "glazingRebate": 28,
     "maxGlassThickness": 54,
     "steelReinforced": true,
-    "crossSection": [[0,0],[83,0],[83,83],[0,83]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        28
+      ],
+      [
+        82.5,
+        28
+      ],
+      [
+        82.5,
+        82.5
+      ],
+      [
+        0,
+        82.5
+      ]
+    ],
     "ufValue": 0.89,
     "uwValue": 0.71,
     "soundInsulation": 48,
     "securityClass": "RC2",
     "passiveHouseCertified": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "acrylcolor"],
-    "colors": ["wit", "creme", "antraciet", "houtdecor eiken", "houtdecor notenbruin"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "acrylcolor"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet",
+      "houtdecor eiken",
+      "houtdecor notenbruin"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 28,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "gealan-s9000-plus",
@@ -60,12 +146,53 @@
     "glazingRebate": 32,
     "maxGlassThickness": 60,
     "steelReinforced": true,
-    "crossSection": [[0,0],[92,0],[92,92],[0,92]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        32
+      ],
+      [
+        92,
+        32
+      ],
+      [
+        92,
+        92
+      ],
+      [
+        0,
+        92
+      ]
+    ],
     "ufValue": 0.82,
     "passiveHouseCertified": true,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "acrylcolor"],
-    "colors": ["wit", "creme", "antraciet"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "acrylcolor"
+    ],
+    "colors": [
+      "wit",
+      "creme",
+      "antraciet"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 32,
+      "type": "buitensponning"
+    }
   },
   {
     "id": "gealan-kubus",
@@ -83,10 +210,52 @@
     "maxGlassThickness": 54,
     "steelReinforced": true,
     "flushDesign": true,
-    "crossSection": [[0,0],[85,0],[85,85],[0,85]],
+    "crossSection": [
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        0
+      ],
+      [
+        15,
+        30
+      ],
+      [
+        85,
+        30
+      ],
+      [
+        85,
+        85
+      ],
+      [
+        0,
+        85
+      ]
+    ],
     "ufValue": 0.92,
-    "applicableAs": ["frame", "sash"],
-    "finishes": ["wit", "folie", "acrylcolor"],
-    "colors": ["wit", "antraciet", "jet zwart", "houtdecor"]
+    "applicableAs": [
+      "frame",
+      "sash"
+    ],
+    "finishes": [
+      "wit",
+      "folie",
+      "acrylcolor"
+    ],
+    "colors": [
+      "wit",
+      "antraciet",
+      "jet zwart",
+      "houtdecor"
+    ],
+    "sponning": {
+      "width": 15,
+      "depth": 30,
+      "type": "buitensponning"
+    }
   }
 ]
