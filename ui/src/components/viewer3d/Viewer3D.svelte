@@ -344,16 +344,26 @@
 
   let resizeObserver;
 
+  let threeLoaded = false;
+
   onMount(async () => {
-    const ok = await loadThreeJS();
-    if (ok) {
-      initScene();
-      if ($currentKozijn && $currentGeometry) {
-        build3DKozijn(scene, $currentKozijn, $currentGeometry);
+    threeLoaded = await loadThreeJS();
+  });
+
+  // Initialize scene when visible becomes true AND Three.js is loaded
+  $effect(() => {
+    if (visible && threeLoaded && container && canvas && !renderer) {
+      try {
+        initScene();
+        if ($currentKozijn && $currentGeometry) {
+          build3DKozijn(scene, $currentKozijn, $currentGeometry);
+        }
+        resizeObserver = new ResizeObserver(() => handleResize());
+        resizeObserver.observe(container);
+      } catch (e) {
+        console.error("3D scene init failed:", e);
+        loadError = true;
       }
-      // Watch for container resize
-      resizeObserver = new ResizeObserver(() => handleResize());
-      resizeObserver.observe(container);
     }
   });
 

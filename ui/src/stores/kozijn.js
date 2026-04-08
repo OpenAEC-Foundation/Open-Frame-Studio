@@ -208,6 +208,18 @@ export async function updateCellGlazing(cellIndex, glazing) {
   await refreshProject();
 }
 
+export async function updateCellSashProfile(cellIndex, profileId, profileName, sashWidth, sashDepth) {
+  const k = get(currentKozijn);
+  if (!k) return;
+  pushSnapshot();
+  const updated = await invoke("update_cell_sash_profile", {
+    id: k.id, cellIndex, profileId, profileName, sashWidth, sashDepth,
+  });
+  currentKozijn.set(updated);
+  await refreshProject();
+  await refreshGeometry(updated.id);
+}
+
 export async function updateFrameColors(colorInside, colorOutside) {
   const k = get(currentKozijn);
   if (!k) return;

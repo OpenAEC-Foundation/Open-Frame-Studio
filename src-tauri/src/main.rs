@@ -58,6 +58,7 @@ fn main() {
             commands::kozijn::get_sjablonen,
             commands::kozijn::save_custom_sjabloon,
             commands::kozijn::delete_custom_sjabloon,
+            commands::kozijn::update_cell_sash_profile,
             commands::kozijn::update_edge_config,
             commands::kozijn::add_frame_extension,
             commands::kozijn::remove_frame_extension,

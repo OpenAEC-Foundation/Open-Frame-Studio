@@ -147,6 +147,30 @@ pub fn remove_frame_extension(
 }
 
 #[tauri::command]
+pub fn update_cell_sash_profile(
+    state: State<'_, AppState>,
+    id: String,
+    cell_index: usize,
+    profile_id: String,
+    profile_name: String,
+    sash_width: f64,
+    sash_depth: f64,
+) -> Result<Kozijn, String> {
+    let mut project = state.project.lock().map_err(|e| e.to_string())?;
+    let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+    let kozijn = project.kozijnen.iter_mut().find(|k| k.id == id)
+        .ok_or("Kozijn niet gevonden")?;
+    let cell = kozijn.cells.get_mut(cell_index)
+        .ok_or("Cel niet gevonden")?;
+
+    cell.sash_profile = Some(ProfileRef { id: profile_id, name: profile_name });
+    cell.sash_width = Some(sash_width);
+    cell.sash_depth = Some(sash_depth);
+
+    Ok(kozijn.clone())
+}
+
+#[tauri::command]
 pub fn get_kozijn(state: State<'_, AppState>, id: String) -> Result<Kozijn, String> {
     let project = state.project.lock().map_err(|e| e.to_string())?;
     let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;

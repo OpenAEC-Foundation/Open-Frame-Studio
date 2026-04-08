@@ -202,107 +202,75 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         }
     }
 
-    // ── Dimension lines (GA Kozijn style) ──
-    // Level 1 (nearest): profielmaat stijl + vakmaten + profielmaat stijl
-    // Level 2 (furthest): buitenmaat totaal
-    // Right side: same pattern for height
-    let dim_offset = 20.0;
+    // ── Dimension lines ──
+    // Bottom Level 1: vakmaten (column widths only, no stijl widths for simple kozijnen)
+    // Bottom Level 2: buitenmaat totaal
+    // Right Level 1: vakmaten (row heights)
+    // Right Level 2: buitenmaat totaal
+    // Only show stijl/dorpel widths when there are multiple cols/rows
+    let dim_gap = 18.0; // gap between dimension levels
+    let dim_start = 15.0; // first level offset from frame
     let mut dimensions = Vec::new();
     let inner_w = ow - 2.0 * fw;
     let inner_h = oh - 2.0 * fw;
     let num_cols = kozijn.grid.columns.len();
     let num_rows = kozijn.grid.rows.len();
+    let has_multi_cols = num_cols > 1;
+    let has_multi_rows = num_rows > 1;
 
-    // ── Bottom: Level 1 — profielmaat links + vakmaten + profielmaat rechts ──
-    // Left stijl width
-    dimensions.push(DimensionLine {
-        x1: 0.0,
-        y1: oh + dim_offset,
-        x2: fw,
-        y2: oh + dim_offset,
-        label: format!("{:.0}", fw),
-        side: DimensionSide::Bottom,
-    });
-
-    // Column widths (vakmaten)
-    for (i, col) in kozijn.grid.columns.iter().enumerate() {
-        let cx = col_positions[i];
+    // ── Bottom Level 1: vakmaten ──
+    let bot_y1 = oh + dim_start;
+    if has_multi_cols {
+        // Show each column width separately
+        for (i, col) in kozijn.grid.columns.iter().enumerate() {
+            let cx = col_positions[i];
+            dimensions.push(DimensionLine {
+                x1: cx, y1: bot_y1, x2: cx + col.size, y2: bot_y1,
+                label: format!("{:.0}", col.size),
+                side: DimensionSide::Bottom,
+            });
+        }
+    } else {
+        // Single column: show inner width (dagmaat)
         dimensions.push(DimensionLine {
-            x1: cx,
-            y1: oh + dim_offset,
-            x2: cx + col.size,
-            y2: oh + dim_offset,
-            label: format!("{:.0}", col.size),
+            x1: fw, y1: bot_y1, x2: ow - fw, y2: bot_y1,
+            label: format!("{:.0}", inner_w),
             side: DimensionSide::Bottom,
         });
     }
 
-    // Right stijl width
-    let last_col_end = col_positions.last()
-        .map(|p| *p + kozijn.grid.columns.last().map(|c| c.size).unwrap_or(0.0))
-        .unwrap_or(fw + inner_w);
+    // ── Bottom Level 2: buitenmaat totaal ──
+    let bot_y2 = oh + dim_start + dim_gap;
     dimensions.push(DimensionLine {
-        x1: last_col_end,
-        y1: oh + dim_offset,
-        x2: ow,
-        y2: oh + dim_offset,
-        label: format!("{:.0}", fw),
-        side: DimensionSide::Bottom,
-    });
-
-    // ── Bottom: Level 2 — buitenmaat totaal ──
-    dimensions.push(DimensionLine {
-        x1: 0.0,
-        y1: oh + dim_offset * 2.5,
-        x2: ow,
-        y2: oh + dim_offset * 2.5,
+        x1: 0.0, y1: bot_y2, x2: ow, y2: bot_y2,
         label: format!("{:.0}", ow),
         side: DimensionSide::Bottom,
     });
 
-    // ── Right: Level 1 — profielmaat boven + vakmaten + profielmaat onder ──
-    // Top dorpel height
-    dimensions.push(DimensionLine {
-        x1: ow + dim_offset,
-        y1: 0.0,
-        x2: ow + dim_offset,
-        y2: fw,
-        label: format!("{:.0}", fw),
-        side: DimensionSide::Right,
-    });
-
-    // Row heights (vakmaten)
-    for (i, row) in kozijn.grid.rows.iter().enumerate() {
-        let cy = row_positions[i];
+    // ── Right Level 1: vakmaten ──
+    let right_x1 = ow + dim_start;
+    if has_multi_rows {
+        for (i, row) in kozijn.grid.rows.iter().enumerate() {
+            let cy = row_positions[i];
+            dimensions.push(DimensionLine {
+                x1: right_x1, y1: cy, x2: right_x1, y2: cy + row.size,
+                label: format!("{:.0}", row.size),
+                side: DimensionSide::Right,
+            });
+        }
+    } else {
+        // Single row: show inner height (dagmaat)
         dimensions.push(DimensionLine {
-            x1: ow + dim_offset,
-            y1: cy,
-            x2: ow + dim_offset,
-            y2: cy + row.size,
-            label: format!("{:.0}", row.size),
+            x1: right_x1, y1: fw, x2: right_x1, y2: oh - fw,
+            label: format!("{:.0}", inner_h),
             side: DimensionSide::Right,
         });
     }
 
-    // Bottom dorpel height
-    let last_row_end = row_positions.last()
-        .map(|p| *p + kozijn.grid.rows.last().map(|r| r.size).unwrap_or(0.0))
-        .unwrap_or(fw + inner_h);
+    // ── Right Level 2: buitenmaat totaal ──
+    let right_x2 = ow + dim_start + dim_gap;
     dimensions.push(DimensionLine {
-        x1: ow + dim_offset,
-        y1: last_row_end,
-        x2: ow + dim_offset,
-        y2: oh,
-        label: format!("{:.0}", fw),
-        side: DimensionSide::Right,
-    });
-
-    // ── Right: Level 2 — buitenmaat totaal ──
-    dimensions.push(DimensionLine {
-        x1: ow + dim_offset * 2.5,
-        y1: 0.0,
-        x2: ow + dim_offset * 2.5,
-        y2: oh,
+        x1: right_x2, y1: 0.0, x2: right_x2, y2: oh,
         label: format!("{:.0}", oh),
         side: DimensionSide::Right,
     });
