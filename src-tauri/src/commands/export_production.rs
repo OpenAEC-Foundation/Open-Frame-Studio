@@ -1,5 +1,6 @@
 use crate::state::AppState;
 use ofs_core::production::compute_production_data;
+use ofs_core::export::pdf_labels::LabelConfig;
 use tauri::State;
 
 #[tauri::command]
@@ -39,4 +40,17 @@ pub async fn export_production_lists(
     }
 
     Ok(output_path)
+}
+
+#[tauri::command]
+pub fn export_labels_pdf(
+    state: State<'_, AppState>,
+    output_path: String,
+) -> Result<(), String> {
+    let project = state.project.lock().map_err(|e| e.to_string())?;
+    let config = LabelConfig::default();
+    let bytes = ofs_core::export::pdf_labels::generate_labels_pdf(&project, &config)?;
+    std::fs::write(&output_path, bytes)
+        .map_err(|e| format!("Kan labels PDF niet opslaan: {}", e))?;
+    Ok(())
 }

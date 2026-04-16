@@ -333,7 +333,8 @@ pub fn compute_production_data(kozijn: &Kozijn) -> ProductionData {
 
         match cell.panel_type {
             PanelType::FixedGlass | PanelType::TurnTilt | PanelType::Turn
-            | PanelType::Tilt | PanelType::Sliding | PanelType::Door => {
+            | PanelType::Tilt | PanelType::Sliding | PanelType::Door
+            | PanelType::TopHung | PanelType::BottomHung | PanelType::LiftSlide | PanelType::Pivot => {
                 // Glass — for operable cells, subtract sash frame width
                 let glass_w = if has_sash && sash_fw > 0.0 {
                     cell_w - 2.0 * sash_fw - 2.0 * GLASS_CLEARANCE_MM

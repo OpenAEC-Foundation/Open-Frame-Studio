@@ -116,6 +116,10 @@
     fillLight.position.set(-1000, 500, -500);
     scene.add(fillLight);
 
+    // Hemisphere light for sky/ground ambient
+    const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x362e1c, 0.3);
+    scene.add(hemiLight);
+
     // Grid helper
     const gridHelper = new THREE.GridHelper(4000, 40, 0x333355, 0x222244);
     gridHelper.position.y = -0.5;
@@ -212,21 +216,24 @@
     const frameColor = getFrameColor(kozijn);
     const frameDepth = kozijn.frame?.frameDepth || 114;
 
-    // Frame material
+    // Frame material — PBR properties depend on material type
+    const matKey = getMaterialKey(kozijn?.frame?.material);
+    const isAluminum = matKey === "aluminum";
     const frameMat = new THREE.MeshStandardMaterial({
       color: frameColor,
-      roughness: 0.7,
-      metalness: 0.0,
+      roughness: isAluminum ? 0.3 : 0.7,
+      metalness: isAluminum ? 0.8 : 0.0,
     });
 
-    // Glass material
+    // Glass material — realistic PBR glass
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: GLASS_COLOR,
       transparent: true,
       opacity: 0.3,
-      roughness: 0.1,
+      roughness: 0.05,
       metalness: 0.0,
-      transmission: 0.6,
+      transmission: 0.9,
+      ior: 1.5,
       thickness: 0.5,
       side: THREE.DoubleSide,
     });
@@ -316,6 +323,25 @@
         kozijnGroup.add(makeBox(rect, frameDepth, dividerMat));
       }
     }
+
+    // Wall context — gray wall behind the kozijn with an opening cutout
+    const preBbox = new THREE.Box3().setFromObject(kozijnGroup);
+    const preSize = preBbox.getSize(new THREE.Vector3());
+    const wallDepth = 300; // 300mm wall
+    const wallSize = { x: preSize.x + 600, y: preSize.y + 400 };
+    const wallGeo = new THREE.BoxGeometry(wallSize.x, wallSize.y, wallDepth);
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xd0c8b8, roughness: 0.9, metalness: 0.0 });
+    const wall = new THREE.Mesh(wallGeo, wallMat);
+    wall.position.set(0, preSize.y / 2, -wallDepth / 2 - frameDepth / 2);
+    wall.receiveShadow = true;
+    kozijnGroup.add(wall);
+
+    // Opening cutout (simple: just place a dark box where the opening is)
+    const openingGeo = new THREE.BoxGeometry(preSize.x + 2, preSize.y + 2, wallDepth + 2);
+    const openingMat = new THREE.MeshBasicMaterial({ color: 0x1a1a2e });
+    const opening = new THREE.Mesh(openingGeo, openingMat);
+    opening.position.set(0, preSize.y / 2, -wallDepth / 2 - frameDepth / 2);
+    kozijnGroup.add(opening);
 
     // Center the model
     const bbox = new THREE.Box3().setFromObject(kozijnGroup);

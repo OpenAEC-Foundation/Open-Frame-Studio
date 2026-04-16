@@ -461,6 +461,22 @@
     {/if}
   {/if}
 
+  <!-- Elliptical frame: filled donut between outer and inner ellipse -->
+  {#if kozijn.frame?.shape?.shapeType === "elliptical"}
+    {@const erx = kozijn.frame.shape.ellipseRx || kozijn.frame.outerWidth / 2}
+    {@const ery = kozijn.frame.shape.ellipseRy || kozijn.frame.outerHeight / 3}
+    {@const ecx = kozijn.frame.outerWidth / 2}
+    {@const ecy = kozijn.frame.outerHeight / 2}
+    {@const eirx = erx - kozijn.frame.frameWidth}
+    {@const eiry = ery - kozijn.frame.frameWidth}
+    <ellipse cx={ecx} cy={ecy} rx={erx} ry={ery}
+      fill="var(--editor-frame)" stroke="var(--editor-frame)" stroke-width="1" />
+    {#if eirx > 0 && eiry > 0}
+      <ellipse cx={ecx} cy={ecy} rx={eirx} ry={eiry}
+        fill="var(--editor-glass)" stroke="var(--editor-frame)" stroke-width="1" />
+    {/if}
+  {/if}
+
   <!-- Arcs for arched/round kozijnen -->
   {#each (geometry.arcs || []) as arc}
     {@const r = arc.radius}

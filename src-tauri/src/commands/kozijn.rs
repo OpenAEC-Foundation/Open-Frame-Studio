@@ -525,6 +525,8 @@ pub fn update_frame_shape(
     top_width: Option<f64>,
     left_angle: Option<f64>,
     right_angle: Option<f64>,
+    polygon_points: Option<Vec<[f64; 2]>>,
+    apex_offset: Option<f64>,
 ) -> Result<Kozijn, String> {
     let mut project = state.project.lock().map_err(|e| e.to_string())?;
     let id: uuid::Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
@@ -538,6 +540,10 @@ pub fn update_frame_shape(
         top_width,
         left_angle,
         right_angle,
+        ellipse_rx: None,
+        ellipse_ry: None,
+        polygon_points,
+        apex_offset,
     };
 
     Ok(kozijn.clone())

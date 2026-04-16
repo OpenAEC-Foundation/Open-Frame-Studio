@@ -9,3 +9,7 @@ pub mod csv_production;
 pub mod xlsx;
 #[cfg(feature = "export")]
 pub mod pdf;
+#[cfg(feature = "export")]
+pub mod pdf_labels;
+#[cfg(feature = "export")]
+pub mod pdf_quotation;

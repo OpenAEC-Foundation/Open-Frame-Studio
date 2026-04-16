@@ -89,6 +89,59 @@ pub fn template_front_door_sj(width: f64, height: f64, sj: &KozijnSjabloon) -> K
     k
 }
 
+pub fn template_top_hung_sj(width: f64, height: f64, sj: &KozijnSjabloon) -> Kozijn {
+    let mut k = Kozijn::new_with_sjabloon("Klapraam", "K01", width, height, sj);
+    k.cells[0].panel_type = PanelType::TopHung;
+    k.cells[0].opening_direction = Some(OpeningDirection::Outward);
+    k.cells[0].assign_sash_from_sjabloon(sj);
+    k
+}
+
+pub fn template_lift_slide_sj(width: f64, height: f64, sj: &KozijnSjabloon) -> Kozijn {
+    let fw = sj.frame_width;
+    let inner_w = width - 2.0 * fw;
+    let half = (inner_w - fw) / 2.0;
+
+    let mut k = Kozijn::new_with_sjabloon("Hefschuifpui", "P01", width, height, sj);
+    k.grid.columns = vec![
+        GridDivision { size: half, divider_profile: None },
+        GridDivision { size: half, divider_profile: Some(sj.tussenstijl_profile.clone()) },
+    ];
+    k.rebuild_cells();
+    k.cells[0].panel_type = PanelType::FixedGlass;
+    k.cells[1].panel_type = PanelType::LiftSlide;
+    k.cells[1].assign_sash_from_sjabloon(sj);
+    k
+}
+
+pub fn template_pivot_sj(width: f64, height: f64, sj: &KozijnSjabloon) -> Kozijn {
+    let mut k = Kozijn::new_with_sjabloon("Pivotraam", "K01", width, height, sj);
+    k.cells[0].panel_type = PanelType::Pivot;
+    k.cells[0].opening_direction = Some(OpeningDirection::Inward);
+    k.cells[0].assign_sash_from_sjabloon(sj);
+    k
+}
+
+pub fn template_stolp_sj(width: f64, height: f64, sj: &KozijnSjabloon) -> Kozijn {
+    let fw = sj.frame_width;
+    let inner_w = width - 2.0 * fw;
+    let half = (inner_w - fw) / 2.0;
+
+    let mut k = Kozijn::new_with_sjabloon("Stolpraam", "K01", width, height, sj);
+    k.grid.columns = vec![
+        GridDivision { size: half, divider_profile: None },
+        GridDivision { size: half, divider_profile: Some(sj.tussenstijl_profile.clone()) },
+    ];
+    k.rebuild_cells();
+    k.cells[0].panel_type = PanelType::Turn;
+    k.cells[0].opening_direction = Some(OpeningDirection::Left);
+    k.cells[0].assign_sash_from_sjabloon(sj);
+    k.cells[1].panel_type = PanelType::Turn;
+    k.cells[1].opening_direction = Some(OpeningDirection::Right);
+    k.cells[1].assign_sash_from_sjabloon(sj);
+    k
+}
+
 // ── Legacy templates (backward compatible, use default sjabloon) ──
 
 pub fn template_single_turn_tilt(width: f64, height: f64) -> Kozijn {
@@ -105,4 +158,20 @@ pub fn template_sliding_door(width: f64, height: f64) -> Kozijn {
 
 pub fn template_front_door(width: f64, height: f64) -> Kozijn {
     template_front_door_sj(width, height, &crate::template::default_sjabloon())
+}
+
+pub fn template_top_hung(width: f64, height: f64) -> Kozijn {
+    template_top_hung_sj(width, height, &crate::template::default_sjabloon())
+}
+
+pub fn template_lift_slide(width: f64, height: f64) -> Kozijn {
+    template_lift_slide_sj(width, height, &crate::template::default_sjabloon())
+}
+
+pub fn template_pivot(width: f64, height: f64) -> Kozijn {
+    template_pivot_sj(width, height, &crate::template::default_sjabloon())
+}
+
+pub fn template_stolp(width: f64, height: f64) -> Kozijn {
+    template_stolp_sj(width, height, &crate::template::default_sjabloon())
 }

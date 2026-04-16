@@ -51,6 +51,8 @@ pub fn create_regular_grid(
         transoms,
         panels: vec![],
         placement: Placement::default(),
+        structural_type: None,
+        thermal_break_width: None,
     };
     vg.rebuild_panels();
     vg

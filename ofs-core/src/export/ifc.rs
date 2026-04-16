@@ -11,8 +11,25 @@ use std::io::Write;
 
 use crate::kozijn::{Kozijn, Material, PanelType, OpeningDirection, WoodType};
 
+/// Level of Detail for IFC geometry export
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LodLevel {
+    Lod200,  // Simple box
+    Lod300,  // Frame + glass (current behavior)
+    Lod400,  // Individual members
+}
+
+impl Default for LodLevel {
+    fn default() -> Self { Self::Lod300 }
+}
+
 /// Generate an IFC4 file from a kozijn definition.
 pub fn generate_ifc(kozijn: &Kozijn, output_path: &str) -> Result<(), String> {
+    generate_ifc_with_lod(kozijn, output_path, LodLevel::default())
+}
+
+/// Generate an IFC4 file from a kozijn definition with a specific LOD level.
+pub fn generate_ifc_with_lod(kozijn: &Kozijn, output_path: &str, lod: LodLevel) -> Result<(), String> {
     let mut ifc = IfcWriter::new();
 
     let frame = &kozijn.frame;
@@ -79,98 +96,140 @@ pub fn generate_ifc(kozijn: &Kozijn, output_path: &str) -> Result<(), String> {
         context, "$"
     ));
 
-    // ── Frame geometry ─────────────────────────────────────────
+    // ── Frame geometry (LOD-dependent) ──────────────────────────
 
-    // Outer profile polyline
-    let outer_pts: Vec<String> = [
-        (0.0, 0.0),
-        (width_m, 0.0),
-        (width_m, height_m),
-        (0.0, height_m),
-        (0.0, 0.0),
-    ]
-    .iter()
-    .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
-    .collect();
-    let outer_polyline = ifc.add_entity(&format!(
-        "IFCPOLYLINE(({}))",
-        outer_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
-    ));
+    let product_shape = match lod {
+        LodLevel::Lod200 => {
+            // Simple extruded box: ow x oh x frame_depth
+            let box_pts: Vec<String> = [
+                (0.0, 0.0),
+                (width_m, 0.0),
+                (width_m, height_m),
+                (0.0, height_m),
+                (0.0, 0.0),
+            ]
+            .iter()
+            .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
+            .collect();
+            let box_polyline = ifc.add_entity(&format!(
+                "IFCPOLYLINE(({}))",
+                box_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
+            ));
+            let box_profile = ifc.add_entity(&format!(
+                "IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,'BoxProfile',{})",
+                box_polyline
+            ));
+            let box_placement = ifc.add_entity(&format!(
+                "IFCAXIS2PLACEMENT3D({},{},{})",
+                origin_3d, axis_z, axis_x
+            ));
+            let box_extrusion = ifc.add_entity(&format!(
+                "IFCEXTRUDEDAREASOLID({},{},{},{:.6})",
+                box_profile, box_placement, axis_z, depth_m
+            ));
+            let shape_rep = ifc.add_entity(&format!(
+                "IFCSHAPEREPRESENTATION({},'Body','SweptSolid',({}))",
+                body_context, box_extrusion
+            ));
+            ifc.add_entity(&format!(
+                "IFCPRODUCTDEFINITIONSHAPE($,$,({}))",
+                shape_rep
+            ))
+        }
+        LodLevel::Lod300 | LodLevel::Lod400 => {
+            // Frame + glass (current behavior); Lod400 same as 300 for now
+            // Outer profile polyline
+            let outer_pts: Vec<String> = [
+                (0.0, 0.0),
+                (width_m, 0.0),
+                (width_m, height_m),
+                (0.0, height_m),
+                (0.0, 0.0),
+            ]
+            .iter()
+            .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
+            .collect();
+            let outer_polyline = ifc.add_entity(&format!(
+                "IFCPOLYLINE(({}))",
+                outer_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
+            ));
 
-    // Inner void polyline
-    let inner_pts: Vec<String> = [
-        (fw_m, fw_m),
-        (width_m - fw_m, fw_m),
-        (width_m - fw_m, height_m - fw_m),
-        (fw_m, height_m - fw_m),
-        (fw_m, fw_m),
-    ]
-    .iter()
-    .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
-    .collect();
-    let inner_polyline = ifc.add_entity(&format!(
-        "IFCPOLYLINE(({}))",
-        inner_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
-    ));
+            // Inner void polyline
+            let inner_pts: Vec<String> = [
+                (fw_m, fw_m),
+                (width_m - fw_m, fw_m),
+                (width_m - fw_m, height_m - fw_m),
+                (fw_m, height_m - fw_m),
+                (fw_m, fw_m),
+            ]
+            .iter()
+            .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
+            .collect();
+            let inner_polyline = ifc.add_entity(&format!(
+                "IFCPOLYLINE(({}))",
+                inner_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
+            ));
 
-    let profile = ifc.add_entity(&format!(
-        "IFCARBITRARYPROFILEDEFWITHVOIDS(.AREA.,'FrameProfile',{},({}))",
-        outer_polyline, inner_polyline
-    ));
+            let profile = ifc.add_entity(&format!(
+                "IFCARBITRARYPROFILEDEFWITHVOIDS(.AREA.,'FrameProfile',{},({}))",
+                outer_polyline, inner_polyline
+            ));
 
-    let extrusion_placement = ifc.add_entity(&format!(
-        "IFCAXIS2PLACEMENT3D({},{},{})",
-        origin_3d, axis_z, axis_x
-    ));
-    let extrusion = ifc.add_entity(&format!(
-        "IFCEXTRUDEDAREASOLID({},{},{},{:.6})",
-        profile, extrusion_placement, axis_z, depth_m
-    ));
+            let extrusion_placement = ifc.add_entity(&format!(
+                "IFCAXIS2PLACEMENT3D({},{},{})",
+                origin_3d, axis_z, axis_x
+            ));
+            let extrusion = ifc.add_entity(&format!(
+                "IFCEXTRUDEDAREASOLID({},{},{},{:.6})",
+                profile, extrusion_placement, axis_z, depth_m
+            ));
 
-    // Glass panel geometry
-    let glass_pts: Vec<String> = [
-        (fw_m, fw_m),
-        (width_m - fw_m, fw_m),
-        (width_m - fw_m, height_m - fw_m),
-        (fw_m, height_m - fw_m),
-        (fw_m, fw_m),
-    ]
-    .iter()
-    .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
-    .collect();
-    let glass_polyline = ifc.add_entity(&format!(
-        "IFCPOLYLINE(({}))",
-        glass_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
-    ));
-    let glass_profile = ifc.add_entity(&format!(
-        "IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,'GlassProfile',{})",
-        glass_polyline
-    ));
+            // Glass panel geometry
+            let glass_pts: Vec<String> = [
+                (fw_m, fw_m),
+                (width_m - fw_m, fw_m),
+                (width_m - fw_m, height_m - fw_m),
+                (fw_m, height_m - fw_m),
+                (fw_m, fw_m),
+            ]
+            .iter()
+            .map(|(x, y)| ifc.add_entity(&format!("IFCCARTESIANPOINT(({:.6},{:.6}))", x, y)))
+            .collect();
+            let glass_polyline = ifc.add_entity(&format!(
+                "IFCPOLYLINE(({}))",
+                glass_pts.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(",")
+            ));
+            let glass_profile = ifc.add_entity(&format!(
+                "IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,'GlassProfile',{})",
+                glass_polyline
+            ));
 
-    let glass_thickness = 0.024; // 24mm
-    let glass_offset = (depth_m - glass_thickness) / 2.0;
-    let glass_origin = ifc.add_entity(&format!(
-        "IFCCARTESIANPOINT((0.0,0.0,{:.6}))",
-        glass_offset
-    ));
-    let glass_placement = ifc.add_entity(&format!(
-        "IFCAXIS2PLACEMENT3D({},{},{})",
-        glass_origin, axis_z, axis_x
-    ));
-    let glass_extrusion = ifc.add_entity(&format!(
-        "IFCEXTRUDEDAREASOLID({},{},{},{:.6})",
-        glass_profile, glass_placement, axis_z, glass_thickness
-    ));
+            let glass_thickness = 0.024; // 24mm
+            let glass_offset = (depth_m - glass_thickness) / 2.0;
+            let glass_origin = ifc.add_entity(&format!(
+                "IFCCARTESIANPOINT((0.0,0.0,{:.6}))",
+                glass_offset
+            ));
+            let glass_placement = ifc.add_entity(&format!(
+                "IFCAXIS2PLACEMENT3D({},{},{})",
+                glass_origin, axis_z, axis_x
+            ));
+            let glass_extrusion = ifc.add_entity(&format!(
+                "IFCEXTRUDEDAREASOLID({},{},{},{:.6})",
+                glass_profile, glass_placement, axis_z, glass_thickness
+            ));
 
-    // Shape representation
-    let shape_rep = ifc.add_entity(&format!(
-        "IFCSHAPEREPRESENTATION({},'Body','SweptSolid',({},{}))",
-        body_context, extrusion, glass_extrusion
-    ));
-    let product_shape = ifc.add_entity(&format!(
-        "IFCPRODUCTDEFINITIONSHAPE($,$,({}))",
-        shape_rep
-    ));
+            // Shape representation
+            let shape_rep = ifc.add_entity(&format!(
+                "IFCSHAPEREPRESENTATION({},'Body','SweptSolid',({},{}))",
+                body_context, extrusion, glass_extrusion
+            ));
+            ifc.add_entity(&format!(
+                "IFCPRODUCTDEFINITIONSHAPE($,$,({}))",
+                shape_rep
+            ))
+        }
+    };
 
     // Placement
     let placement_axis = ifc.add_entity(&format!(
@@ -663,6 +722,10 @@ fn ils_panel_type(pt: PanelType) -> &'static str {
         PanelType::Door => "deur",
         PanelType::Panel => "paneel",
         PanelType::Ventilation => "ventilatie",
+        PanelType::TopHung => "klapraam",
+        PanelType::BottomHung => "tuimelraam",
+        PanelType::LiftSlide => "hefschuif",
+        PanelType::Pivot => "pivot",
     }
 }
 

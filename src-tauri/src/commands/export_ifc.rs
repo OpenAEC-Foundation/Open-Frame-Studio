@@ -6,6 +6,7 @@ pub async fn export_ifc(
     state: State<'_, AppState>,
     id: String,
     output_path: String,
+    lod: Option<String>,
 ) -> Result<String, String> {
     let kozijn = {
         let project = state.project.lock().map_err(|e| e.to_string())?;
@@ -18,7 +19,13 @@ pub async fn export_ifc(
             .clone()
     };
 
-    ofs_core::export::ifc::generate_ifc(&kozijn, &output_path)?;
+    let lod_level = match lod.as_deref() {
+        Some("200") => ofs_core::export::ifc::LodLevel::Lod200,
+        Some("400") => ofs_core::export::ifc::LodLevel::Lod400,
+        _ => ofs_core::export::ifc::LodLevel::Lod300,
+    };
+
+    ofs_core::export::ifc::generate_ifc_with_lod(&kozijn, &output_path, lod_level)?;
 
     Ok(output_path)
 }

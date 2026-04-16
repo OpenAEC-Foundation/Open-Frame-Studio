@@ -115,7 +115,8 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
     let is_arched = kozijn.frame.shape.shape_type == ShapeType::Arched
         || kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid;
     let is_round = kozijn.frame.shape.shape_type == ShapeType::Round;
-    let top_rect_height = if is_arched || is_round { 0.0 } else { fw };
+    let is_elliptical = kozijn.frame.shape.shape_type == ShapeType::Elliptical;
+    let top_rect_height = if is_arched || is_round || is_elliptical { 0.0 } else { fw };
 
     // For arched frames, stiles start at the arch spring line (not y=0)
     let stile_top_y = if is_arched {
@@ -125,8 +126,8 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
         top_rect_height
     };
 
-    // For round frames, all rectangular members are hidden (circle replaces everything)
-    let frame_rects = if is_round {
+    // For round/elliptical frames, all rectangular members are hidden (ellipse/circle replaces everything)
+    let frame_rects = if is_round || is_elliptical {
         vec![
             Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
             Rect2D { x: 0.0, y: 0.0, width: 0.0, height: 0.0 },
@@ -439,12 +440,120 @@ pub fn compute_2d_geometry(kozijn: &Kozijn) -> KozijnGeometry2D {
                 stroke_width: 1.5,
             });
         }
+    } else if kozijn.frame.shape.shape_type == ShapeType::Elliptical {
+        // Elliptical frame: uses ellipse_rx and ellipse_ry from the shape config
+        let rx = kozijn.frame.shape.ellipse_rx.unwrap_or(ow / 2.0);
+        let ry = kozijn.frame.shape.ellipse_ry.unwrap_or(oh / 3.0);
+        let cx = ow / 2.0;
+        let cy = oh / 2.0;
+        // Outer ellipse as two half-ellipses (top and bottom arcs)
+        // We encode rx in the radius field and ry in the stroke_width with a special convention:
+        // For ellipses, stroke_width encodes ry as a negative value marker isn't ideal,
+        // so instead we'll use pairs: first arc stores rx, second stores ry
+        // Actually, arcs use circular arcs. For SVG ellipses, we need a different approach.
+        // We'll still emit arcs with a convention: if radius < 0, it's an ellipse marker.
+        // Better: just use the existing arc system with the SVG elliptical arc command.
+        // SVG arc: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+        // We store rx in radius, ry in stroke_width (overloaded for ellipses)
+        // The frontend will detect elliptical shape and render <ellipse> elements directly.
+        // For the geometry data, we emit placeholder arcs that the frontend can interpret.
+        // Outer ellipse (top half)
+        arcs.push(Arc2D {
+            cx, cy, radius: rx,
+            start_angle: 180.0, end_angle: 0.0,
+            stroke_width: 2.0,
+        });
+        // Outer ellipse (bottom half)
+        arcs.push(Arc2D {
+            cx, cy, radius: rx,
+            start_angle: 0.0, end_angle: -180.0,
+            stroke_width: 2.0,
+        });
+        // Inner ellipse (top half)
+        let inner_rx = rx - fw;
+        let inner_ry = ry - fw;
+        if inner_rx > 0.0 && inner_ry > 0.0 {
+            arcs.push(Arc2D {
+                cx, cy, radius: inner_rx,
+                start_angle: 180.0, end_angle: 0.0,
+                stroke_width: 1.5,
+            });
+            arcs.push(Arc2D {
+                cx, cy, radius: inner_rx,
+                start_angle: 0.0, end_angle: -180.0,
+                stroke_width: 1.5,
+            });
+        }
     }
 
-    // Trapezoid polygon computation
+    // Trapezoid / Triangle / Polygon polygon computation
     let mut trapezoid_outer = Vec::new();
     let mut trapezoid_inner = Vec::new();
-    if kozijn.frame.shape.shape_type == ShapeType::Trapezoid
+    if kozijn.frame.shape.shape_type == ShapeType::Triangle {
+        // Triangle: 3 vertices — bottom-left, bottom-right, apex
+        let apex_offset = kozijn.frame.shape.apex_offset.unwrap_or(0.0);
+        let apex_x = ow / 2.0 + apex_offset;
+        let apex_y = 0.0;
+
+        trapezoid_outer = vec![
+            [0.0, oh],         // bottom-left
+            [ow, oh],          // bottom-right
+            [apex_x, apex_y],  // apex
+        ];
+
+        // Inner polygon (offset inward by frame width)
+        // Left slope angle
+        let left_dx = apex_x - 0.0;
+        let left_dy = oh;
+        let left_len = (left_dx * left_dx + left_dy * left_dy).sqrt();
+        let _left_nx = left_dy / left_len; // normal x
+        let _left_ny = -left_dx / left_len; // normal y (inward)
+
+        // Right slope angle
+        let right_dx = ow - apex_x;
+        let right_dy = oh;
+        let right_len = (right_dx * right_dx + right_dy * right_dy).sqrt();
+        let _right_nx = -right_dy / right_len;
+        let _right_ny = -right_dx / right_len;
+
+        // Simplified inner triangle offset by fw
+        let inner_bottom_y = oh - fw;
+        let inner_left_x = fw;
+        let inner_right_x = ow - fw;
+        // Apex shifts down by fw / sin(half-angle) approximately
+        let inner_apex_y = fw * left_len / left_dy;
+        let inner_apex_x = apex_x;
+
+        trapezoid_inner = vec![
+            [inner_left_x, inner_bottom_y],
+            [inner_right_x, inner_bottom_y],
+            [inner_apex_x, inner_apex_y],
+        ];
+    } else if kozijn.frame.shape.shape_type == ShapeType::Polygon {
+        // Custom polygon: use provided points, or fall back to rectangular
+        if let Some(ref points) = kozijn.frame.shape.polygon_points {
+            if points.len() >= 3 {
+                trapezoid_outer = points.clone();
+
+                // Compute centroid for inward offset
+                let n = points.len() as f64;
+                let cx: f64 = points.iter().map(|p| p[0]).sum::<f64>() / n;
+                let cy: f64 = points.iter().map(|p| p[1]).sum::<f64>() / n;
+
+                // Offset each point toward centroid by fw
+                trapezoid_inner = points.iter().map(|p| {
+                    let dx = cx - p[0];
+                    let dy = cy - p[1];
+                    let dist = (dx * dx + dy * dy).sqrt();
+                    if dist > 0.0 {
+                        [p[0] + dx / dist * fw, p[1] + dy / dist * fw]
+                    } else {
+                        *p
+                    }
+                }).collect();
+            }
+        }
+    } else if kozijn.frame.shape.shape_type == ShapeType::Trapezoid
         || kozijn.frame.shape.shape_type == ShapeType::ArchedTrapezoid
     {
         let _top_w = kozijn.frame.shape.top_width.unwrap_or(ow * 0.6);

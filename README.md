@@ -1,4 +1,4 @@
-# Open Frame Studio v0.2.0
+# Open Frame Studio v1.0.0
 
 **Free, open-source kozijn (window frame) design software for the Dutch construction industry.**
 
@@ -41,7 +41,7 @@ Open Frame Studio is a desktop application for designing, documenting, and expor
 
 ---
 
-## Changelog v0.2.0 (2026-04-08)
+## Changelog v1.0.0 (2026-04-08)
 
 ### Rendering Overhaul
 - **Arc/boog rendering herschreven** — correcte wiskundige berekening (center_y, acos hoeken, SVG sweep-flag), boog gaat nu naar boven

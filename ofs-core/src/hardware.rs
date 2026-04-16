@@ -371,6 +371,111 @@ pub fn default_hardware_set(
             })
         }
 
+        PanelType::TopHung => {
+            Some(HardwareSet {
+                hinges: Some(HingeConfig {
+                    hinge_type: HingeType::Opleg,
+                    count: 2,
+                    load_capacity_kg: weight * 1.5,
+                    side: HingeSide::Top,
+                }),
+                handle: Some(HandleConfig {
+                    handle_type: HandleType::Knop,
+                    side: HandleSide::Center,
+                    height_mm: 200.0, // low handle for top-hung
+                    lockable: false,
+                }),
+                locking: Some(LockingConfig {
+                    lock_type: LockType::Espagnolet,
+                    locking_points: locking_points.min(2),
+                    cam_type,
+                    cylinder: CylinderType::None,
+                }),
+                ventilation: None,
+                closer: None,
+                security_class,
+                auto_selected: true,
+            })
+        }
+
+        PanelType::BottomHung => {
+            Some(HardwareSet {
+                hinges: Some(HingeConfig {
+                    hinge_type: HingeType::Opleg,
+                    count: 2,
+                    load_capacity_kg: weight * 1.5,
+                    side: HingeSide::Bottom,
+                }),
+                handle: Some(HandleConfig {
+                    handle_type: HandleType::Kruk,
+                    side: HandleSide::Center,
+                    height_mm: cell_height_mm - 100.0,
+                    lockable: false,
+                }),
+                locking: Some(LockingConfig {
+                    lock_type: LockType::Espagnolet,
+                    locking_points: locking_points.min(3),
+                    cam_type,
+                    cylinder: CylinderType::None,
+                }),
+                ventilation: None,
+                closer: None,
+                security_class,
+                auto_selected: true,
+            })
+        }
+
+        PanelType::LiftSlide => {
+            Some(HardwareSet {
+                hinges: None, // lift-slide has rollers
+                handle: Some(HandleConfig {
+                    handle_type: HandleType::InlaatGreep,
+                    side: HandleSide::Right,
+                    height_mm: 1050.0,
+                    lockable: true,
+                }),
+                locking: Some(LockingConfig {
+                    lock_type: LockType::SlidingLock,
+                    locking_points: locking_points.min(4),
+                    cam_type: CamType::HaakSluitNok,
+                    cylinder: CylinderType::None,
+                }),
+                ventilation: None,
+                closer: None,
+                security_class,
+                auto_selected: true,
+            })
+        }
+
+        PanelType::Pivot => {
+            let hinge_count = calculate_hinge_count(cell_height_mm, weight);
+
+            Some(HardwareSet {
+                hinges: Some(HingeConfig {
+                    hinge_type: HingeType::Verdekt,
+                    count: hinge_count,
+                    load_capacity_kg: weight * 1.5,
+                    side: HingeSide::Top, // pivot hinges at top and bottom center
+                }),
+                handle: Some(HandleConfig {
+                    handle_type: HandleType::Kruk,
+                    side: HandleSide::Right,
+                    height_mm: 1050.0,
+                    lockable: false,
+                }),
+                locking: Some(LockingConfig {
+                    lock_type: LockType::Espagnolet,
+                    locking_points,
+                    cam_type,
+                    cylinder: CylinderType::None,
+                }),
+                ventilation: None,
+                closer: None,
+                security_class,
+                auto_selected: true,
+            })
+        }
+
         PanelType::Door => {
             let hinge_count = calculate_hinge_count(cell_height_mm, weight).max(3);
             let hinge_side = hinge_side_from_direction(opening_direction, panel_type);

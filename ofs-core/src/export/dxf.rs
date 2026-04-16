@@ -355,5 +355,9 @@ fn panel_label(pt: PanelType) -> &'static str {
         PanelType::Door => "DR",
         PanelType::Panel => "P",
         PanelType::Ventilation => "V",
+        PanelType::TopHung => "KL",
+        PanelType::BottomHung => "TM",
+        PanelType::LiftSlide => "HS",
+        PanelType::Pivot => "PV",
     }
 }

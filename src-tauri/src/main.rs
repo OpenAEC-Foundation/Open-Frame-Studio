@@ -77,6 +77,7 @@ fn main() {
             commands::calculation::get_cost_estimate_project,
             // Production export commands
             commands::export_production::export_production_lists,
+            commands::export_production::export_labels_pdf,
             // Vliesgevel commands
             commands::vliesgevel::create_vliesgevel,
             commands::vliesgevel::create_vliesgevel_from_template,
@@ -90,6 +91,8 @@ fn main() {
             commands::vliesgevel::get_vliesgevel_geometry,
             commands::vliesgevel::get_vliesgevel_production,
             commands::vliesgevel::remove_vliesgevel,
+            // Glass library commands
+            commands::glass::get_glass_library,
             // Import commands
             commands::profiles::load_profile_library,
             commands::settings::load_settings,
@@ -99,6 +102,43 @@ fn main() {
             // Blender commands
             commands::blender::send_to_blender,
             commands::blender::check_blender_connection,
+            // Pricing commands
+            commands::pricing::get_pricing_config,
+            commands::pricing::update_pricing_config,
+            // Optimization commands
+            commands::optimization::optimize_project_cut_list,
+            // BCF commands
+            commands::bcf::get_bcf_topics,
+            commands::bcf::create_bcf_topic,
+            commands::bcf::update_bcf_topic_status,
+            commands::bcf::add_bcf_comment,
+            // IDS commands
+            commands::ids::validate_project_ids,
+            // Quotation commands
+            commands::quotation::get_quotations,
+            commands::quotation::create_quotation,
+            commands::quotation::update_quotation_status,
+            commands::quotation::create_quotation_revision,
+            // Procurement commands
+            commands::procurement::generate_purchase_proposals,
+            // Planning commands
+            commands::planning::get_production_plan,
+            // Energy commands
+            commands::energy::get_project_energy,
+            // Certification commands
+            commands::certification::check_certification,
+            // CNC commands
+            commands::cnc::export_cnc_gcode,
+            commands::cnc::get_cnc_parts,
+            // IFC import commands
+            commands::import_ifc::import_ifc_file,
+            // Combination commands
+            commands::combination::create_combination,
+            commands::combination::add_to_combination,
+            commands::combination::get_combinations,
+            commands::combination::remove_combination,
+            // IFC roundtrip commands
+            commands::ifc_roundtrip::compare_ifc_files,
             get_platform,
         ])
         .setup(|app| {

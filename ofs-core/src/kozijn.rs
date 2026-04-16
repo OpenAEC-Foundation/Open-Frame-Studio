@@ -330,6 +330,18 @@ pub struct FrameShape {
     /// Trapezoid: right stile angle in degrees (90 = vertical)
     #[serde(default)]
     pub right_angle: Option<f64>,
+    /// Elliptical: horizontal radius in mm (default ow/2)
+    #[serde(default)]
+    pub ellipse_rx: Option<f64>,
+    /// Elliptical: vertical radius in mm (default oh/3)
+    #[serde(default)]
+    pub ellipse_ry: Option<f64>,
+    /// Polygon: custom polygon points [[x,y], ...] in mm (for Polygon shape)
+    #[serde(default)]
+    pub polygon_points: Option<Vec<[f64; 2]>>,
+    /// Triangle: apex horizontal offset from center in mm (for Triangle shape)
+    #[serde(default)]
+    pub apex_offset: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -342,6 +354,8 @@ pub enum ShapeType {
     Elliptical,
     Trapezoid,      // schuine stijl(en) of dorpel
     ArchedTrapezoid, // boog + schuine stijlen gecombineerd (CNCware-stijl)
+    Triangle,       // driehoekig kozijn
+    Polygon,        // vrije veelhoek
 }
 
 /// Grid subdivision — columns (vertical) and rows (horizontal)
@@ -418,7 +432,8 @@ impl Cell {
     /// Assign sash profile for operable cells (raamhout/deurhout)
     pub fn assign_sash_from_sjabloon(&mut self, sj: &crate::template::KozijnSjabloon) {
         match self.panel_type {
-            PanelType::TurnTilt | PanelType::Turn | PanelType::Tilt | PanelType::Sliding => {
+            PanelType::TurnTilt | PanelType::Turn | PanelType::Tilt | PanelType::Sliding
+            | PanelType::TopHung | PanelType::BottomHung | PanelType::LiftSlide | PanelType::Pivot => {
                 self.sash_profile = Some(sj.raamhout_profile.clone());
                 self.sash_width = Some(sj.sash_width);
                 self.sash_depth = Some(sj.sash_depth);
@@ -448,6 +463,10 @@ pub enum PanelType {
     Door,        // deur
     Panel,       // dicht paneel
     Ventilation, // ventilatierooster
+    TopHung,     // klapraam / klep
+    BottomHung,  // tuimelraam
+    LiftSlide,   // hefschuifpui
+    Pivot,       // melkmeisje / pivot raam
 }
 
 impl PanelType {
@@ -461,6 +480,10 @@ impl PanelType {
             Self::Door => "Deur",
             Self::Panel => "Paneel",
             Self::Ventilation => "Ventilatie",
+            Self::TopHung => "Klapraam",
+            Self::BottomHung => "Tuimelraam",
+            Self::LiftSlide => "Hefschuifpui",
+            Self::Pivot => "Pivotraam",
         }
     }
 
@@ -468,6 +491,7 @@ impl PanelType {
         matches!(
             self,
             Self::TurnTilt | Self::Turn | Self::Tilt | Self::Sliding | Self::Door
+            | Self::TopHung | Self::BottomHung | Self::LiftSlide | Self::Pivot
         )
     }
 }
@@ -583,6 +607,20 @@ pub struct Project {
     pub custom_profiles: Vec<crate::profile::ProfileDefinition>,
     #[serde(default)]
     pub custom_sjablonen: Vec<crate::template::KozijnSjabloon>,
+    /// Stable IFC GUIDs: maps element path (e.g. "kozijn:{id}") to a persistent UUID
+    #[serde(default)]
+    pub ifc_guid_map: std::collections::HashMap<String, uuid::Uuid>,
+    /// Pricing / quotation configuration
+    #[serde(default)]
+    pub pricing_config: Option<crate::pricing::PricingConfig>,
+    /// BCF topics for issue tracking
+    #[serde(default)]
+    pub bcf_topics: Vec<crate::bcf::BcfTopic>,
+    /// Quotation versions
+    #[serde(default)]
+    pub quotations: Vec<crate::quotation::Quotation>,
+    #[serde(default)]
+    pub combinations: Vec<crate::combination::CombinationKozijn>,
 }
 
 impl Project {
@@ -600,6 +638,11 @@ impl Project {
             vliesgevels: vec![],
             custom_profiles: vec![],
             custom_sjablonen: vec![],
+            ifc_guid_map: std::collections::HashMap::new(),
+            pricing_config: None,
+            bcf_topics: vec![],
+            quotations: vec![],
+            combinations: vec![],
         }
     }
 }

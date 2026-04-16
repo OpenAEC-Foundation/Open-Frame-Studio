@@ -34,6 +34,12 @@ pub struct Vliesgevel {
     pub panels: Vec<CurtainPanel>,
     #[serde(default)]
     pub placement: Placement,
+    /// Structural system type (stick, unitised, semi-unitised)
+    #[serde(default)]
+    pub structural_type: Option<StructuralType>,
+    /// Thermal break width in mm (for aluminum profiles)
+    #[serde(default)]
+    pub thermal_break_width: Option<f64>,
 }
 
 /// A vertical mullion line in the curtain wall grid.
@@ -69,6 +75,14 @@ pub struct AnchorPoint {
     /// Position along the member in mm
     pub position_along: f64,
     pub anchor_type: AnchorType,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StructuralType {
+    Stick,
+    Unitised,
+    SemiUnitised,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -289,6 +303,8 @@ mod tests {
             ],
             panels: vec![],
             placement: Placement::default(),
+            structural_type: None,
+            thermal_break_width: None,
         }
     }
 

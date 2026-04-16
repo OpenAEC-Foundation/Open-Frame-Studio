@@ -2,3 +2,4 @@
 
 pub mod dxf_profile;
 pub mod catalog;
+pub mod ifc_import;
