@@ -1,9 +1,9 @@
 [workspace]
-members = ["src-tauri", "ofs-core", "ofs-wasm"]
+members = ["src-tauri", "ofs-core", "ofs-wasm", "ofs-cloud"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.0"
+version = "0.4.0"
 edition = "2021"
 license = "AGPL-3.0"
 

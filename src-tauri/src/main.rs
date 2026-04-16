@@ -4,6 +4,7 @@ mod commands;
 mod models;
 mod state;
 mod blender;
+mod cloud;
 
 use state::AppState;
 
